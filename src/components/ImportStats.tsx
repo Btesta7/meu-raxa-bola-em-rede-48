@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { FileText } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
-import { ImportedStats } from '@/types';
+import { ImportedStats, PlayerPosition } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';

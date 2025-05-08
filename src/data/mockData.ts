@@ -1,4 +1,3 @@
-
 import { Match, User, ChatMessage } from "../types";
 
 export const mockUsers: User[] = [
@@ -9,9 +8,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=1",
     stats: {
       goals: 0,
+      assists: 0,
       matches: 15,
       wins: 8,
-      attendance: 90
+      attendance: 90,
+      yellowCards: 1,
+      redCards: 0
     }
   },
   {
@@ -21,9 +23,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=2",
     stats: {
       goals: 22,
+      assists: 14,
       matches: 18,
       wins: 10,
-      attendance: 85
+      attendance: 85,
+      yellowCards: 3,
+      redCards: 0
     }
   },
   {
@@ -33,9 +38,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=3",
     stats: {
       goals: 3,
+      assists: 5,
       matches: 20,
       wins: 12,
-      attendance: 95
+      attendance: 95,
+      yellowCards: 4,
+      redCards: 0
     }
   },
   {
@@ -45,9 +53,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=4",
     stats: {
       goals: 8,
+      assists: 12,
       matches: 16,
       wins: 9,
-      attendance: 80
+      attendance: 80,
+      yellowCards: 2,
+      redCards: 0
     }
   },
   {
@@ -57,9 +68,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=5",
     stats: {
       goals: 17,
+      assists: 8,
       matches: 19,
       wins: 11,
-      attendance: 85
+      attendance: 85,
+      yellowCards: 5,
+      redCards: 1
     }
   },
   {
@@ -69,9 +83,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=6",
     stats: {
       goals: 2,
+      assists: 3,
       matches: 17,
       wins: 10,
-      attendance: 75
+      attendance: 75,
+      yellowCards: 6,
+      redCards: 0
     }
   },
   {
@@ -81,9 +98,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=7",
     stats: {
       goals: 12,
+      assists: 15,
       matches: 20,
       wins: 13,
-      attendance: 100
+      attendance: 100,
+      yellowCards: 1,
+      redCards: 0
     }
   },
   {
@@ -93,9 +113,12 @@ export const mockUsers: User[] = [
     avatar: "https://i.pravatar.cc/150?img=8",
     stats: {
       goals: 0,
+      assists: 0,
       matches: 14,
       wins: 7,
-      attendance: 70
+      attendance: 70,
+      yellowCards: 0,
+      redCards: 0
     }
   }
 ];
