@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Ball, Calendar, Users, BarChart3, MessageCircle } from 'lucide-react';
+import { Football, Calendar, Users, BarChart3, MessageCircle } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -14,7 +14,7 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2" onClick={() => navigate('/')} role="button">
-            <Ball size={28} />
+            <Football size={28} />
             <h1 className="text-xl font-bold">Meu Raxa</h1>
           </div>
           

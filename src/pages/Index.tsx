@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Ball, Plus } from 'lucide-react';
+import { Football, Plus } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
@@ -41,7 +41,7 @@ const Index = () => {
         
         {upcomingMatches.length === 0 && pastMatches.length === 0 ? (
           <div className="text-center py-20">
-            <Ball className="mx-auto h-16 w-16 text-gray-300" />
+            <Football className="mx-auto h-16 w-16 text-gray-300" />
             <h3 className="mt-4 text-lg font-medium text-gray-600">Nenhuma partida agendada</h3>
             <p className="mt-2 text-gray-500">Crie sua primeira partida clicando no botão acima.</p>
           </div>
