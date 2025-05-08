@@ -15,9 +15,12 @@ export type PlayerPosition =
 
 export interface UserStats {
   goals: number;
+  assists: number; // novo campo de assistências
   matches: number;
   wins: number;
   attendance: number; // percentage
+  yellowCards: number; // novo campo de cartões amarelos
+  redCards: number; // novo campo de cartões vermelhos
 }
 
 export interface Match {
@@ -45,4 +48,17 @@ export interface ChatMessage {
   userAvatar: string;
   message: string;
   timestamp: string;
+}
+
+// Interface para estatísticas importadas do PDF
+export interface ImportedStats {
+  name: string;
+  position?: PlayerPosition;
+  goals?: number;
+  assists?: number;
+  matches?: number;
+  wins?: number;
+  attendance?: number;
+  yellowCards?: number;
+  redCards?: number;
 }

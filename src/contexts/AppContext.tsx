@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Match, ChatMessage } from '../types';
+import { User, Match, ChatMessage, ImportedStats } from '../types';
 import { mockUsers, mockMatches, mockChatMessages } from '../data/mockData';
 import { toast } from '@/components/ui/sonner';
 
@@ -15,6 +15,7 @@ interface AppContextType {
   sortTeams: (matchId: string) => void;
   sendMessage: (message: string) => void;
   recordMatchResult: (matchId: string, teamAScore: number, teamBScore: number) => void;
+  importPlayerStats: (stats: ImportedStats[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -216,6 +217,65 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }));
   };
 
+  // Função para importar estatísticas de jogadores a partir de dados extraídos de PDF
+  const importPlayerStats = (stats: ImportedStats[]) => {
+    let updatedCount = 0;
+    let newCount = 0;
+
+    // Para cada estatística importada
+    stats.forEach(importedStat => {
+      // Procura usuário existente com o mesmo nome
+      const existingUserIndex = users.findIndex(u => 
+        u.name.toLowerCase() === importedStat.name.toLowerCase()
+      );
+
+      if (existingUserIndex !== -1) {
+        // Atualiza usuário existente
+        const updatedUser = { ...users[existingUserIndex] };
+        updatedUser.stats = {
+          ...updatedUser.stats,
+          goals: importedStat.goals ?? updatedUser.stats.goals,
+          assists: importedStat.assists ?? 0,
+          matches: importedStat.matches ?? updatedUser.stats.matches,
+          wins: importedStat.wins ?? updatedUser.stats.wins,
+          attendance: importedStat.attendance ?? updatedUser.stats.attendance,
+          yellowCards: importedStat.yellowCards ?? 0,
+          redCards: importedStat.redCards ?? 0
+        };
+        
+        if (importedStat.position) {
+          updatedUser.position = importedStat.position;
+        }
+
+        const updatedUsers = [...users];
+        updatedUsers[existingUserIndex] = updatedUser;
+        setUsers(updatedUsers);
+        updatedCount++;
+      } else {
+        // Cria novo usuário
+        const newUser: User = {
+          id: `user-${Date.now()}-${newCount}`,
+          name: importedStat.name,
+          position: importedStat.position || "Meio-campista",
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(importedStat.name)}`,
+          stats: {
+            goals: importedStat.goals || 0,
+            assists: importedStat.assists || 0,
+            matches: importedStat.matches || 0,
+            wins: importedStat.wins || 0,
+            attendance: importedStat.attendance || 0,
+            yellowCards: importedStat.yellowCards || 0,
+            redCards: importedStat.redCards || 0
+          }
+        };
+        setUsers(prevUsers => [...prevUsers, newUser]);
+        newCount++;
+      }
+    });
+
+    toast.success(`Importação concluída: ${updatedCount} jogadores atualizados, ${newCount} novos jogadores adicionados.`);
+  };
+
   const value = {
     currentUser,
     users,
@@ -227,7 +287,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     cancelPresence,
     sortTeams,
     sendMessage,
-    recordMatchResult
+    recordMatchResult,
+    importPlayerStats
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
