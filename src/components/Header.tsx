@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Football, Calendar, Users, BarChart3, MessageCircle } from 'lucide-react';
+import { Calendar, Users, BarChart3, MessageCircle } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -14,7 +14,20 @@ const Header = () => {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2" onClick={() => navigate('/')} role="button">
-            <Football size={28} />
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round" 
+              className="size-7"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a9.96 9.96 0 0 0-6.33 2.258c-.22.189.05.523.287.506 2.1-.148 5.445.648 7.223 2.426 1.77 1.77 2.568 5.098 2.426 7.202-.017.236.317.507.506.287A9.96 9.96 0 0 0 22 12c0-5.523-4.477-10-10-10Z" />
+              <path d="M12 22a9.96 9.96 0 0 0 6.33-2.258c.22-.189-.05-.523-.287-.506-2.1.148-5.445-.648-7.223-2.426-1.77-1.77-2.568-5.098-2.426-7.202.017-.236-.317-.507-.506-.287A9.96 9.96 0 0 0 2 12c0 5.523 4.477 10 10 10Z" />
+            </svg>
             <h1 className="text-xl font-bold">Meu Raxa</h1>
           </div>
           
