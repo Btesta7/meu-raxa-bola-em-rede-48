@@ -1,21 +1,28 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Match, ChatMessage, ImportedStats } from '../types';
-import { mockUsers, mockMatches, mockChatMessages } from '../data/mockData';
-import { toast } from '@/components/ui/sonner';
 
+import React, { createContext, useContext, ReactNode } from 'react';
+import { UserProvider, useUserContext } from './UserContext';
+import { MatchProvider, useMatchContext } from './MatchContext';
+import { ChatProvider, useChatContext } from './ChatContext';
+
+// Combined context type that re-exports from all subcontexts
 interface AppContextType {
-  currentUser: User | null;
-  users: User[];
-  matches: Match[];
-  chatMessages: ChatMessage[];
-  login: (userId: string) => void;
-  createMatch: (match: Omit<Match, 'id' | 'confirmedPlayers'>) => void;
-  confirmPresence: (matchId: string) => void;
-  cancelPresence: (matchId: string) => void;
-  sortTeams: (matchId: string) => void;
-  sendMessage: (message: string) => void;
-  recordMatchResult: (matchId: string, teamAScore: number, teamBScore: number) => void;
-  importPlayerStats: (stats: ImportedStats[]) => void;
+  // From UserContext
+  currentUser: ReturnType<typeof useUserContext>['currentUser'];
+  users: ReturnType<typeof useUserContext>['users'];
+  login: ReturnType<typeof useUserContext>['login'];
+  importPlayerStats: ReturnType<typeof useUserContext>['importPlayerStats'];
+  
+  // From MatchContext
+  matches: ReturnType<typeof useMatchContext>['matches'];
+  createMatch: ReturnType<typeof useMatchContext>['createMatch'];
+  confirmPresence: ReturnType<typeof useMatchContext>['confirmPresence'];
+  cancelPresence: ReturnType<typeof useMatchContext>['cancelPresence'];
+  sortTeams: ReturnType<typeof useMatchContext>['sortTeams'];
+  recordMatchResult: ReturnType<typeof useMatchContext>['recordMatchResult'];
+  
+  // From ChatContext
+  chatMessages: ReturnType<typeof useChatContext>['chatMessages'];
+  sendMessage: ReturnType<typeof useChatContext>['sendMessage'];
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -28,268 +35,68 @@ export const useAppContext = () => {
   return context;
 };
 
+// Combined provider that wraps all subproviders
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]);
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [matches, setMatches] = useState<Match[]>(mockMatches);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(mockChatMessages);
+  return (
+    <UserProvider>
+      <UserConsumer>
+        {(userContext) => (
+          <MatchProvider>
+            <MatchConsumer>
+              {(matchContext) => (
+                <ChatProvider>
+                  <ChatConsumer>
+                    {(chatContext) => {
+                      // Combine all contexts into one
+                      const combinedContext: AppContextType = {
+                        // User context
+                        currentUser: userContext.currentUser,
+                        users: userContext.users,
+                        login: userContext.login,
+                        importPlayerStats: userContext.importPlayerStats,
+                        
+                        // Match context
+                        matches: matchContext.matches,
+                        createMatch: matchContext.createMatch,
+                        confirmPresence: matchContext.confirmPresence,
+                        cancelPresence: matchContext.cancelPresence,
+                        sortTeams: matchContext.sortTeams,
+                        recordMatchResult: matchContext.recordMatchResult,
+                        
+                        // Chat context
+                        chatMessages: chatContext.chatMessages,
+                        sendMessage: chatContext.sendMessage,
+                      };
+                      
+                      return (
+                        <AppContext.Provider value={combinedContext}>
+                          {children}
+                        </AppContext.Provider>
+                      );
+                    }}
+                  </ChatConsumer>
+                </ChatProvider>
+              )}
+            </MatchConsumer>
+          </MatchProvider>
+        )}
+      </UserConsumer>
+    </UserProvider>
+  );
+};
 
-  const login = (userId: string) => {
-    const user = users.find(u => u.id === userId);
-    if (user) {
-      setCurrentUser(user);
-      toast.success(`Bem-vindo, ${user.name}!`);
-    }
-  };
+// Consumer components to help with the nested provider pattern
+const UserConsumer = ({ children }: { children: (context: ReturnType<typeof useUserContext>) => React.ReactNode }) => {
+  const context = useUserContext();
+  return <>{children(context)}</>;
+};
 
-  const createMatch = (matchData: Omit<Match, 'id' | 'confirmedPlayers'>) => {
-    const newMatch: Match = {
-      ...matchData,
-      id: `${matches.length + 1}`,
-      confirmedPlayers: currentUser ? [currentUser] : [],
-    };
+const MatchConsumer = ({ children }: { children: (context: ReturnType<typeof useMatchContext>) => React.ReactNode }) => {
+  const context = useMatchContext();
+  return <>{children(context)}</>;
+};
 
-    setMatches([...matches, newMatch]);
-    toast.success('Partida criada com sucesso!');
-  };
-
-  const confirmPresence = (matchId: string) => {
-    if (!currentUser) return;
-
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        if (match.confirmedPlayers.length >= match.maxPlayers) {
-          toast.error('A partida já atingiu o limite de jogadores!');
-          return match;
-        }
-        
-        if (match.confirmedPlayers.some(player => player.id === currentUser.id)) {
-          toast.info('Você já está confirmado nesta partida.');
-          return match;
-        }
-        
-        toast.success('Presença confirmada!');
-        return {
-          ...match,
-          confirmedPlayers: [...match.confirmedPlayers, currentUser],
-        };
-      }
-      return match;
-    }));
-  };
-
-  const cancelPresence = (matchId: string) => {
-    if (!currentUser) return;
-
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        toast.success('Presença cancelada.');
-        return {
-          ...match,
-          confirmedPlayers: match.confirmedPlayers.filter(
-            player => player.id !== currentUser.id
-          ),
-        };
-      }
-      return match;
-    }));
-  };
-
-  // Function to balance teams based on positions and skill level
-  const sortTeams = (matchId: string) => {
-    const match = matches.find(m => m.id === matchId);
-    if (!match) return;
-
-    // Simple balanced team sorting algorithm
-    // In reality, this would be more sophisticated based on player stats
-    const players = [...match.confirmedPlayers];
-    const goalkeepers = players.filter(p => p.position === "Goleiro");
-    const defenders = players.filter(p => p.position === "Defensor");
-    const midfielders = players.filter(p => p.position === "Meio-campista");
-    const forwards = players.filter(p => p.position === "Atacante");
-
-    const teamA: User[] = [];
-    const teamB: User[] = [];
-
-    // Distribute goalkeepers
-    if (goalkeepers.length >= 2) {
-      teamA.push(goalkeepers[0]);
-      teamB.push(goalkeepers[1]);
-    } else if (goalkeepers.length === 1) {
-      teamA.push(goalkeepers[0]);
-    }
-
-    // Distribute other positions evenly
-    const distributeEvenly = (positionPlayers: User[]) => {
-      positionPlayers.forEach((player, index) => {
-        if (!teamA.includes(player) && !teamB.includes(player)) {
-          if (index % 2 === 0 && teamA.length < match.maxPlayers / 2) {
-            teamA.push(player);
-          } else if (teamB.length < match.maxPlayers / 2) {
-            teamB.push(player);
-          } else {
-            teamA.push(player);
-          }
-        }
-      });
-    };
-
-    distributeEvenly(defenders);
-    distributeEvenly(midfielders);
-    distributeEvenly(forwards);
-
-    // Add any remaining players
-    players.forEach(player => {
-      if (!teamA.includes(player) && !teamB.includes(player)) {
-        if (teamA.length < teamB.length) {
-          teamA.push(player);
-        } else {
-          teamB.push(player);
-        }
-      }
-    });
-
-    setMatches(matches.map(m => {
-      if (m.id === matchId) {
-        return {
-          ...m,
-          teams: { teamA, teamB }
-        };
-      }
-      return m;
-    }));
-
-    toast.success('Times sorteados com sucesso!');
-  };
-
-  const sendMessage = (message: string) => {
-    if (!currentUser || !message.trim()) return;
-
-    const newMessage: ChatMessage = {
-      id: `${chatMessages.length + 1}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
-      message: message.trim(),
-      timestamp: new Date().toISOString()
-    };
-
-    setChatMessages([...chatMessages, newMessage]);
-  };
-
-  const recordMatchResult = (matchId: string, teamAScore: number, teamBScore: number) => {
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        // Update match result
-        const updatedMatch = {
-          ...match,
-          status: "completed" as const,
-          result: {
-            teamAScore,
-            teamBScore
-          }
-        };
-
-        // Update player stats (simplified version)
-        if (match.teams) {
-          const winners = teamAScore > teamBScore ? match.teams.teamA : 
-                         teamBScore > teamAScore ? match.teams.teamB : [];
-
-          setUsers(users.map(user => {
-            if (match.confirmedPlayers.some(p => p.id === user.id)) {
-              return {
-                ...user,
-                stats: {
-                  ...user.stats,
-                  matches: user.stats.matches + 1,
-                  wins: winners.some(p => p.id === user.id) ? user.stats.wins + 1 : user.stats.wins
-                }
-              };
-            }
-            return user;
-          }));
-        }
-
-        toast.success('Resultado registrado com sucesso!');
-        return updatedMatch;
-      }
-      return match;
-    }));
-  };
-
-  // Função para importar estatísticas de jogadores a partir de dados extraídos de PDF
-  const importPlayerStats = (stats: ImportedStats[]) => {
-    let updatedCount = 0;
-    let newCount = 0;
-
-    // Para cada estatística importada
-    stats.forEach(importedStat => {
-      // Procura usuário existente com o mesmo nome
-      const existingUserIndex = users.findIndex(u => 
-        u.name.toLowerCase() === importedStat.name.toLowerCase()
-      );
-
-      if (existingUserIndex !== -1) {
-        // Atualiza usuário existente
-        const updatedUser = { ...users[existingUserIndex] };
-        updatedUser.stats = {
-          ...updatedUser.stats,
-          goals: importedStat.goals ?? updatedUser.stats.goals,
-          assists: importedStat.assists ?? 0,
-          matches: importedStat.matches ?? updatedUser.stats.matches,
-          wins: importedStat.wins ?? updatedUser.stats.wins,
-          attendance: importedStat.attendance ?? updatedUser.stats.attendance,
-          yellowCards: importedStat.yellowCards ?? 0,
-          redCards: importedStat.redCards ?? 0
-        };
-        
-        if (importedStat.position) {
-          updatedUser.position = importedStat.position;
-        }
-
-        const updatedUsers = [...users];
-        updatedUsers[existingUserIndex] = updatedUser;
-        setUsers(updatedUsers);
-        updatedCount++;
-      } else {
-        // Cria novo usuário
-        const newUser: User = {
-          id: `user-${Date.now()}-${newCount}`,
-          name: importedStat.name,
-          position: importedStat.position || "Meio-campista",
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(importedStat.name)}`,
-          stats: {
-            goals: importedStat.goals || 0,
-            assists: importedStat.assists || 0,
-            matches: importedStat.matches || 0,
-            wins: importedStat.wins || 0,
-            attendance: importedStat.attendance || 0,
-            yellowCards: importedStat.yellowCards || 0,
-            redCards: importedStat.redCards || 0
-          }
-        };
-        setUsers(prevUsers => [...prevUsers, newUser]);
-        newCount++;
-      }
-    });
-
-    toast.success(`Importação concluída: ${updatedCount} jogadores atualizados, ${newCount} novos jogadores adicionados.`);
-  };
-
-  const value = {
-    currentUser,
-    users,
-    matches,
-    chatMessages,
-    login,
-    createMatch,
-    confirmPresence,
-    cancelPresence,
-    sortTeams,
-    sendMessage,
-    recordMatchResult,
-    importPlayerStats
-  };
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+const ChatConsumer = ({ children }: { children: (context: ReturnType<typeof useChatContext>) => React.ReactNode }) => {
+  const context = useChatContext();
+  return <>{children(context)}</>;
 };
