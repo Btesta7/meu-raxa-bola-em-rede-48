@@ -12,8 +12,8 @@ const Register = () => {
 
   useEffect(() => {
     if (isAuthenticated && isNewUser) {
-      // Redirect new users to profile immediately
-      navigate('/profile');
+      // Redirect new users to onboarding immediately
+      navigate('/onboarding');
     } else if (isAuthenticated && !isNewUser) {
       // Redirect existing users to dashboard
       navigate('/');

@@ -9,19 +9,15 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
 const Profile = () => {
-  const { user, isLoading, isNewUser } = useUserContext();
+  const { user, isLoading } = useUserContext();
   const navigate = useNavigate();
-  const [isEditing, setIsEditing] = useState(isNewUser);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!user && !isLoading) {
       navigate('/login');
     }
-    // Auto-enable editing mode for new users
-    if (isNewUser) {
-      setIsEditing(true);
-    }
-  }, [user, isLoading, navigate, isNewUser]);
+  }, [user, isLoading, navigate]);
 
   if (isLoading) {
     return (
@@ -44,28 +40,14 @@ const Profile = () => {
       
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
-          {!isNewUser && (
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/')}
-              className="mb-4"
-            >
-              <ArrowLeft size={16} className="mr-2" />
-              Voltar ao Dashboard
-            </Button>
-          )}
-
-          {isNewUser && (
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h2 className="text-lg font-semibold text-blue-900 mb-2">
-                Bem-vindo ao Meu Raxa! 🎉
-              </h2>
-              <p className="text-blue-700">
-                Complete seu perfil para ter a melhor experiência. Adicione suas informações pessoais, 
-                foto e preferências de jogo.
-              </p>
-            </div>
-          )}
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/')}
+            className="mb-4"
+          >
+            <ArrowLeft size={16} className="mr-2" />
+            Voltar ao Dashboard
+          </Button>
           
           <ProfileHeader
             user={user}

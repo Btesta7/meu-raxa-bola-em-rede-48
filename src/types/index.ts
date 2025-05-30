@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   email: string;
@@ -25,6 +26,7 @@ export interface User {
     privacy: 'public' | 'friends' | 'private';
   };
   isProfileComplete?: boolean;
+  onboardingStep?: number;
 }
 
 export type PlayerPosition = 
@@ -137,6 +139,39 @@ export interface AvatarUpload {
   error?: string;
 }
 
+// NOVAS INTERFACES PARA ONBOARDING
+export interface OnboardingStep {
+  id: number;
+  title: string;
+  description: string;
+  fields: string[];
+  isComplete: boolean;
+}
+
+export interface OnboardingData {
+  // Informações básicas (Step 1)
+  name: string;
+  age: number | null;
+  phone: string;
+  
+  // Informações de futebol (Step 2)
+  position: PlayerPosition;
+  secondaryPositions: PlayerPosition[];
+  preferredFoot: 'right' | 'left' | 'both';
+  yearsPlaying: number | null;
+  
+  // Avatar e finalização (Step 3)
+  avatar?: File;
+  bio: string;
+  
+  // Contato de emergência (Step 4)
+  emergencyContact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+}
+
 interface UserContextType extends AuthState {
   users: User[];
   login: (credentials: AuthCredentials) => Promise<boolean>;
@@ -148,6 +183,8 @@ interface UserContextType extends AuthState {
   importPlayerStats: (stats: ImportedStats[]) => void;
   clearError: () => void;
   isNewUser: boolean;
+  completeOnboarding: (data: OnboardingData) => Promise<boolean>;
+  saveOnboardingStep: (step: number, data: Partial<OnboardingData>) => Promise<boolean>;
 }
 
 export { };

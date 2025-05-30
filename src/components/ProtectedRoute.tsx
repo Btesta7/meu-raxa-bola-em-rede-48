@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useUserContext } from '@/contexts/UserContext';
+import { checkProfileCompletion } from '@/hooks/useOnboarding';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -31,9 +32,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  // Se é um novo usuário e não está na página de perfil, redirecionar para o perfil
-  if (isNewUser && window.location.pathname !== '/profile') {
-    return <Navigate to="/profile" replace />;
+  // Verificar se o perfil está completo
+  const isProfileComplete = user.isProfileComplete || checkProfileCompletion(user);
+
+  // Se é um novo usuário ou perfil incompleto e não está na página de onboarding, redirecionar
+  if ((isNewUser || !isProfileComplete) && window.location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
   }
 
   // Se requer admin e o usuário não é admin, redireciona para home

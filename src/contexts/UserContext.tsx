@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User, ImportedStats, AuthCredentials, RegisterData, AuthState } from '../types';
+import { User, ImportedStats, AuthCredentials, RegisterData, AuthState, OnboardingData } from '../types';
 import { mockUsers } from '../data/mockData';
 import { toast } from '@/components/ui/sonner';
 import { validateLoginForm, validateRegisterForm, sanitizeInput } from '@/utils/validation';
 import { saveSession, getStoredSession, clearSession, generateAvatar } from '@/utils/auth';
+import { checkProfileCompletion } from '@/hooks/useOnboarding';
+import { sanitizeOnboardingData } from '@/utils/onboardingValidation';
 
 interface UserContextType extends AuthState {
   users: User[];
@@ -16,6 +18,8 @@ interface UserContextType extends AuthState {
   importPlayerStats: (stats: ImportedStats[]) => void;
   clearError: () => void;
   isNewUser: boolean;
+  completeOnboarding: (data: OnboardingData) => Promise<boolean>;
+  saveOnboardingStep: (step: number, data: Partial<OnboardingData>) => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -39,7 +43,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [users, setUsers] = useState<User[]>([]);
   const [isNewUser, setIsNewUser] = useState(false);
 
-  // Verificar sessão armazenada ao inicializar
   useEffect(() => {
     const initializeAuth = async () => {
       try {
@@ -228,6 +231,54 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAuthState(prev => ({ ...prev, error: null }));
   };
 
+  // NOVAS FUNÇÕES DE ONBOARDING
+  const completeOnboarding = async (data: OnboardingData): Promise<boolean> => {
+    if (!authState.user) return false;
+
+    try {
+      const sanitizedData = sanitizeOnboardingData(data);
+      
+      const updatedUser: User = {
+        ...authState.user,
+        name: sanitizedData.name,
+        age: sanitizedData.age,
+        phone: sanitizedData.phone,
+        position: sanitizedData.position,
+        secondaryPositions: sanitizedData.secondaryPositions,
+        preferredFoot: sanitizedData.preferredFoot,
+        yearsPlaying: sanitizedData.yearsPlaying,
+        bio: sanitizedData.bio,
+        emergencyContact: sanitizedData.emergencyContact,
+        isProfileComplete: true,
+        preferences: {
+          notifications: true,
+          privacy: 'public'
+        }
+      };
+
+      // Atualizar no estado
+      setUsers(prev => prev.map(u => u.id === authState.user!.id ? updatedUser : u));
+      setAuthState(prev => ({ ...prev, user: updatedUser }));
+      
+      // Atualizar sessão
+      saveSession(updatedUser, false);
+      
+      setIsNewUser(false);
+      toast.success('Perfil completado com sucesso! Bem-vindo ao Meu Raxa!');
+      return true;
+    } catch (error) {
+      console.error('Erro ao completar onboarding:', error);
+      toast.error('Erro ao completar perfil');
+      return false;
+    }
+  };
+
+  const saveOnboardingStep = async (step: number, data: Partial<OnboardingData>): Promise<boolean> => {
+    // Em um sistema real, salvaria o progresso no backend
+    console.log(`Salvando step ${step}:`, data);
+    return true;
+  };
+
   const updateUserProfile = (userId: string, updates: Partial<User>) => {
     setUsers(prevUsers => 
       prevUsers.map(user => 
@@ -328,7 +379,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateUserStats,
     importPlayerStats,
     clearError,
-    isNewUser
+    isNewUser,
+    completeOnboarding,
+    saveOnboardingStep
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
