@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Notification, NotificationType, NotificationSettings } from '@/types/notifications';
+import type { Notification } from '@/types/notifications';
+import { NotificationType, NotificationSettings } from '@/types/notifications';
 import { useUserContext } from './UserContext';
 import { toast } from '@/components/ui/sonner';
 
@@ -119,8 +119,8 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     });
 
     // Show push notification if enabled
-    if (settings.enablePush && 'Notification' in window && Notification.permission === 'granted') {
-      new Notification(notification.title, {
+    if (settings.enablePush && 'Notification' in window && window.Notification.permission === 'granted') {
+      new window.Notification(notification.title, {
         body: notification.message,
         icon: '/favicon.ico',
       });
@@ -172,16 +172,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
       return false;
     }
 
-    if (Notification.permission === 'granted') {
+    if (window.Notification.permission === 'granted') {
       return true;
     }
 
-    if (Notification.permission === 'denied') {
+    if (window.Notification.permission === 'denied') {
       toast.error('Notificações foram bloqueadas. Habilite nas configurações do navegador.');
       return false;
     }
 
-    const permission = await Notification.requestPermission();
+    const permission = await window.Notification.requestPermission();
     const granted = permission === 'granted';
     
     if (granted) {
