@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -187,4 +186,8 @@ interface UserContextType extends AuthState {
   saveOnboardingStep: (step: number, data: Partial<OnboardingData>) => Promise<boolean>;
 }
 
+export * from './notifications';
+export * from './audit';
+export * from './dashboard';
+export * from './passwordReset';
 export { };

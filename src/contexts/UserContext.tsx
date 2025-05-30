@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, ImportedStats, AuthCredentials, RegisterData, AuthState, OnboardingData } from '../types';
 import { mockUsers } from '../data/mockData';
@@ -6,6 +7,7 @@ import { validateLoginForm, validateRegisterForm, sanitizeInput } from '@/utils/
 import { saveSession, getStoredSession, clearSession, generateAvatar } from '@/utils/auth';
 import { checkProfileCompletion } from '@/hooks/useOnboarding';
 import { sanitizeOnboardingData } from '@/utils/onboardingValidation';
+import { AuditAction } from '@/types/audit';
 
 interface UserContextType extends AuthState {
   users: User[];
@@ -20,6 +22,7 @@ interface UserContextType extends AuthState {
   isNewUser: boolean;
   completeOnboarding: (data: OnboardingData) => Promise<boolean>;
   saveOnboardingStep: (step: number, data: Partial<OnboardingData>) => Promise<boolean>;
+  logAuditAction?: (action: AuditAction, resource: string, details?: any, resourceId?: string) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -42,6 +45,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
   const [users, setUsers] = useState<User[]>([]);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [logAuditAction, setLogAuditAction] = useState<((action: AuditAction, resource: string, details?: any, resourceId?: string) => void) | undefined>();
+
+  // This will be set by AuditProvider
+  const setAuditLogger = (logger: (action: AuditAction, resource: string, details?: any, resourceId?: string) => void) => {
+    setLogAuditAction(() => logger);
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -91,6 +100,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const validationErrors = validateLoginForm(credentials);
       if (validationErrors.length > 0) {
         setAuthState(prev => ({ ...prev, error: validationErrors[0], isLoading: false }));
+        logAuditAction?.(AuditAction.LOGIN_FAILED, 'user', { email: credentials.email, reason: 'validation_error' });
         return false;
       }
 
@@ -104,6 +114,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const user = users.find(u => u.email.toLowerCase() === email);
       if (!user) {
         setAuthState(prev => ({ ...prev, error: 'Credenciais inválidas', isLoading: false }));
+        logAuditAction?.(AuditAction.LOGIN_FAILED, 'user', { email: credentials.email, reason: 'user_not_found' });
         return false;
       }
 
@@ -112,6 +123,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const expectedPassword = `password${user.id}`;
       if (credentials.password !== expectedPassword) {
         setAuthState(prev => ({ ...prev, error: 'Credenciais inválidas', isLoading: false }));
+        logAuditAction?.(AuditAction.LOGIN_FAILED, 'user', { email: credentials.email, reason: 'invalid_password' });
         return false;
       }
 
@@ -130,6 +142,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
 
       setIsNewUser(false); // Reset new user flag on login
+      logAuditAction?.(AuditAction.LOGIN, 'user', { userId: user.id }, user.id);
       toast.success(`Bem-vindo, ${user.name}!`);
       return true;
     } catch (error) {
@@ -212,6 +225,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    if (authState.user) {
+      logAuditAction?.(AuditAction.LOGOUT, 'user', { userId: authState.user.id }, authState.user.id);
+    }
     clearSession();
     setIsNewUser(false);
     setAuthState({
@@ -264,6 +280,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       saveSession(updatedUser, false);
       
       setIsNewUser(false);
+      logAuditAction?.(AuditAction.PROFILE_UPDATE, 'user', { onboardingCompleted: true }, updatedUser.id);
       toast.success('Perfil completado com sucesso! Bem-vindo ao Meu Raxa!');
       return true;
     } catch (error) {
@@ -297,6 +314,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       saveSession(updatedUser, false);
     }
     
+    logAuditAction?.(AuditAction.PROFILE_UPDATE, 'user', updates, userId);
     toast.success('Perfil atualizado com sucesso!');
   };
 
@@ -381,8 +399,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     clearError,
     isNewUser,
     completeOnboarding,
-    saveOnboardingStep
+    saveOnboardingStep,
+    logAuditAction,
   };
+
+  // Expose the setAuditLogger for AuditProvider to use
+  React.useEffect(() => {
+    (window as any).setUserContextAuditLogger = setAuditLogger;
+  }, []);
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };

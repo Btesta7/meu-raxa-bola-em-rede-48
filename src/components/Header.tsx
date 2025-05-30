@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
 
 const Header = () => {
   const { user, logout } = useUserContext();
@@ -47,6 +48,8 @@ const Header = () => {
           
           {user && (
             <div className="flex items-center space-x-3">
+              <NotificationCenter />
+              
               <div className="flex items-center space-x-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
