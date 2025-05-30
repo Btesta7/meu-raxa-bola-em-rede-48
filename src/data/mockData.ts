@@ -1,8 +1,10 @@
+
 import { Match, User, ChatMessage } from "../types";
 
 export const mockUsers: User[] = [
   {
     id: "1",
+    email: "carlos.silva@email.com",
     name: "Carlos Silva",
     position: "Goleiro",
     avatar: "https://i.pravatar.cc/150?img=1",
@@ -14,10 +16,15 @@ export const mockUsers: User[] = [
       attendance: 90,
       yellowCards: 1,
       redCards: 0
-    }
+    },
+    isAdmin: true, // Primeiro usuário é admin
+    isActive: true,
+    createdAt: new Date('2024-01-15'),
+    lastLogin: new Date('2025-05-29')
   },
   {
     id: "2",
+    email: "rodrigo.oliveira@email.com",
     name: "Rodrigo Oliveira",
     position: "Atacante",
     avatar: "https://i.pravatar.cc/150?img=2",
@@ -29,10 +36,15 @@ export const mockUsers: User[] = [
       attendance: 85,
       yellowCards: 3,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-02-10'),
+    lastLogin: new Date('2025-05-28')
   },
   {
     id: "3",
+    email: "lucas.mendes@email.com",
     name: "Lucas Mendes",
     position: "Defensor",
     avatar: "https://i.pravatar.cc/150?img=3",
@@ -44,10 +56,15 @@ export const mockUsers: User[] = [
       attendance: 95,
       yellowCards: 4,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-01-20'),
+    lastLogin: new Date('2025-05-27')
   },
   {
     id: "4",
+    email: "bruno.santos@email.com",
     name: "Bruno Santos",
     position: "Meio-campista",
     avatar: "https://i.pravatar.cc/150?img=4",
@@ -59,10 +76,15 @@ export const mockUsers: User[] = [
       attendance: 80,
       yellowCards: 2,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-03-05'),
+    lastLogin: new Date('2025-05-26')
   },
   {
     id: "5",
+    email: "pedro.costa@email.com",
     name: "Pedro Costa",
     position: "Atacante",
     avatar: "https://i.pravatar.cc/150?img=5",
@@ -74,10 +96,15 @@ export const mockUsers: User[] = [
       attendance: 85,
       yellowCards: 5,
       redCards: 1
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-02-28'),
+    lastLogin: new Date('2025-05-25')
   },
   {
     id: "6",
+    email: "felipe.rocha@email.com",
     name: "Felipe Rocha",
     position: "Defensor",
     avatar: "https://i.pravatar.cc/150?img=6",
@@ -89,10 +116,15 @@ export const mockUsers: User[] = [
       attendance: 75,
       yellowCards: 6,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-03-12'),
+    lastLogin: new Date('2025-05-24')
   },
   {
     id: "7",
+    email: "andre.gomes@email.com",
     name: "André Gomes",
     position: "Meio-campista",
     avatar: "https://i.pravatar.cc/150?img=7",
@@ -104,10 +136,15 @@ export const mockUsers: User[] = [
       attendance: 100,
       yellowCards: 1,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-01-30'),
+    lastLogin: new Date('2025-05-23')
   },
   {
     id: "8",
+    email: "joao.paulo@email.com",
     name: "João Paulo",
     position: "Goleiro",
     avatar: "https://i.pravatar.cc/150?img=8",
@@ -119,7 +156,11 @@ export const mockUsers: User[] = [
       attendance: 70,
       yellowCards: 0,
       redCards: 0
-    }
+    },
+    isAdmin: false,
+    isActive: true,
+    createdAt: new Date('2024-04-02'),
+    lastLogin: new Date('2025-05-22')
   }
 ];
 
@@ -195,3 +236,4 @@ export const mockChatMessages: ChatMessage[] = [
     timestamp: "2025-05-05T14:42:00"
   }
 ];
+

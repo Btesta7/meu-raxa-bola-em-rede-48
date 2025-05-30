@@ -9,6 +9,8 @@ import Players from "./pages/Players";
 import Stats from "./pages/Stats";
 import Chat from "./pages/Chat";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import MatchDetails from "./pages/MatchDetails";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./contexts/AppContext";
@@ -25,6 +27,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/" element={
               <ProtectedRoute>
                 <Index />
@@ -59,3 +63,4 @@ const App = () => (
 );
 
 export default App;
+

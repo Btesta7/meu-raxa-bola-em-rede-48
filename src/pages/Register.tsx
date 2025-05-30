@@ -4,9 +4,9 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '@/contexts/UserContext';
 import AuthLayout from '@/components/auth/AuthLayout';
-import LoginForm from '@/components/auth/LoginForm';
+import RegisterForm from '@/components/auth/RegisterForm';
 
-const Login = () => {
+const Register = () => {
   const { isAuthenticated, isLoading } = useUserContext();
   const navigate = useNavigate();
 
@@ -29,13 +29,13 @@ const Login = () => {
 
   return (
     <AuthLayout 
-      title="Entrar" 
-      subtitle="Acesse sua conta do Meu Raxa"
+      title="Criar conta" 
+      subtitle="Junte-se à comunidade do Meu Raxa"
     >
-      <LoginForm />
+      <RegisterForm />
     </AuthLayout>
   );
 };
 
-export default Login;
+export default Register;
 

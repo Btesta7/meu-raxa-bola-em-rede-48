@@ -1,12 +1,17 @@
+
 export interface User {
   id: string;
+  email: string; // NOVO CAMPO
   name: string;
   position: PlayerPosition;
   avatar: string;
   stats: UserStats;
-  isAdmin?: boolean; // novo campo para identificar administradores
-  age?: number; // novo campo para idade
-  bio?: string; // novo campo para biografia
+  isAdmin?: boolean;
+  age?: number;
+  bio?: string;
+  createdAt: Date; // NOVO CAMPO
+  lastLogin?: Date; // NOVO CAMPO
+  isActive: boolean; // NOVO CAMPO
 }
 
 export type PlayerPosition = 
@@ -17,12 +22,12 @@ export type PlayerPosition =
 
 export interface UserStats {
   goals: number;
-  assists: number; // novo campo de assistências
+  assists: number;
   matches: number;
   wins: number;
-  attendance: number; // percentage
-  yellowCards: number; // novo campo de cartões amarelos
-  redCards: number; // novo campo de cartões vermelhos
+  attendance: number;
+  yellowCards: number;
+  redCards: number;
 }
 
 export interface Match {
@@ -64,3 +69,31 @@ export interface ImportedStats {
   yellowCards?: number;
   redCards?: number;
 }
+
+// NOVAS INTERFACES PARA AUTENTICAÇÃO
+export interface AuthCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+  position: PlayerPosition;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
