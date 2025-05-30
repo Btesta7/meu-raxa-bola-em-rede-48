@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
+import Profile from "./pages/Profile";
 import MatchDetails from "./pages/MatchDetails";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./contexts/AppContext";
@@ -49,6 +50,11 @@ const App = () => (
                 <Chat />
               </ProtectedRoute>
             } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
             <Route path="/match/:matchId" element={
               <ProtectedRoute>
                 <MatchDetails />
@@ -63,4 +69,3 @@ const App = () => (
 );
 
 export default App;
-

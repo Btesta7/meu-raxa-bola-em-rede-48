@@ -1,11 +1,18 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, BarChart3, MessageCircle, LogOut } from 'lucide-react';
+import { Calendar, Users, BarChart3, MessageCircle, LogOut, User } from 'lucide-react';
 import { useUserContext } from '@/contexts/UserContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const { user, logout } = useUserContext();
@@ -41,29 +48,38 @@ const Header = () => {
           {user && (
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="hidden sm:block">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">{user.name}</span>
-                    {user.isAdmin && (
-                      <Badge variant="secondary" className="text-xs">
-                        Admin
-                      </Badge>
-                    )}
-                  </div>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="flex items-center space-x-2 cursor-pointer hover:bg-white/10 rounded-lg p-2 transition-colors">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
+                      </Avatar>
+                      <div className="hidden sm:block">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">{user.name}</span>
+                          {user.isAdmin && (
+                            <Badge variant="secondary" className="text-xs">
+                              Admin
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="mr-2 h-4 w-4" />
+                      Meu Perfil
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sair
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-white hover:text-white hover:bg-white/10"
-              >
-                <LogOut size={16} />
-              </Button>
             </div>
           )}
         </div>

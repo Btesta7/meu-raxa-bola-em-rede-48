@@ -236,6 +236,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (authState.user && authState.user.id === userId) {
       const updatedUser = { ...authState.user, ...updates };
       setAuthState(prev => ({ ...prev, user: updatedUser }));
+      
+      // Atualizar sessão salva
+      saveSession(updatedUser, false);
     }
     
     toast.success('Perfil atualizado com sucesso!');
@@ -324,4 +327,3 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
-

@@ -1,7 +1,7 @@
 
 export interface User {
   id: string;
-  email: string; // NOVO CAMPO
+  email: string;
   name: string;
   position: PlayerPosition;
   avatar: string;
@@ -9,9 +9,23 @@ export interface User {
   isAdmin?: boolean;
   age?: number;
   bio?: string;
-  createdAt: Date; // NOVO CAMPO
-  lastLogin?: Date; // NOVO CAMPO
-  isActive: boolean; // NOVO CAMPO
+  createdAt: Date;
+  lastLogin?: Date;
+  isActive: boolean;
+  phone?: string;
+  secondaryPositions?: PlayerPosition[];
+  preferredFoot?: 'right' | 'left' | 'both';
+  yearsPlaying?: number;
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences?: {
+    notifications: boolean;
+    privacy: 'public' | 'friends' | 'private';
+  };
+  isProfileComplete?: boolean;
 }
 
 export type PlayerPosition = 
@@ -57,7 +71,6 @@ export interface ChatMessage {
   timestamp: string;
 }
 
-// Interface para estatísticas importadas do PDF
 export interface ImportedStats {
   name: string;
   position?: PlayerPosition;
@@ -70,7 +83,6 @@ export interface ImportedStats {
   redCards?: number;
 }
 
-// NOVAS INTERFACES PARA AUTENTICAÇÃO
 export interface AuthCredentials {
   email: string;
   password: string;
@@ -97,3 +109,31 @@ export interface ValidationError {
   message: string;
 }
 
+// NOVAS INTERFACES PARA FASE 2
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  phone: string;
+  age: number | null;
+  bio: string;
+  position: PlayerPosition;
+  secondaryPositions: PlayerPosition[];
+  preferredFoot: 'right' | 'left' | 'both';
+  yearsPlaying: number | null;
+  emergencyContact: {
+    name: string;
+    phone: string;
+    relationship: string;
+  };
+  preferences: {
+    notifications: boolean;
+    privacy: 'public' | 'friends' | 'private';
+  };
+}
+
+export interface AvatarUpload {
+  file: File;
+  preview: string;
+  isUploading: boolean;
+  error?: string;
+}
