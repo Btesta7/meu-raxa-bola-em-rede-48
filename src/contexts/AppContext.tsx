@@ -37,70 +37,53 @@ export const useAppContext = () => {
   return context;
 };
 
-// Combined provider that wraps all subproviders
+// Combined provider that wraps all subproviders in the correct order
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <UserProvider>
-      <UserConsumer>
-        {(userContext) => (
-          <MatchProvider>
-            <MatchConsumer>
-              {(matchContext) => (
-                <ChatProvider>
-                  <ChatConsumer>
-                    {(chatContext) => {
-                      // Combine all contexts into one
-                      const combinedContext: AppContextType = {
-                        // User context - mapeando user para currentUser
-                        currentUser: userContext.user,
-                        users: userContext.users,
-                        login: userContext.login,
-                        logout: userContext.logout,
-                        updateUserProfile: userContext.updateUserProfile,
-                        importPlayerStats: userContext.importPlayerStats,
-                        
-                        // Match context
-                        matches: matchContext.matches,
-                        createMatch: matchContext.createMatch,
-                        confirmPresence: matchContext.confirmPresence,
-                        cancelPresence: matchContext.cancelPresence,
-                        sortTeams: matchContext.sortTeams,
-                        recordMatchResult: matchContext.recordMatchResult,
-                        
-                        // Chat context
-                        chatMessages: chatContext.chatMessages,
-                        sendMessage: chatContext.sendMessage,
-                      };
-                      
-                      return (
-                        <AppContext.Provider value={combinedContext}>
-                          {children}
-                        </AppContext.Provider>
-                      );
-                    }}
-                  </ChatConsumer>
-                </ChatProvider>
-              )}
-            </MatchConsumer>
-          </MatchProvider>
-        )}
-      </UserConsumer>
+      <MatchProvider>
+        <ChatProvider>
+          <AppContextCombiner>
+            {children}
+          </AppContextCombiner>
+        </ChatProvider>
+      </MatchProvider>
     </UserProvider>
   );
 };
 
-// Consumer components to help with the nested provider pattern
-const UserConsumer = ({ children }: { children: (context: ReturnType<typeof useUserContext>) => React.ReactNode }) => {
-  const context = useUserContext();
-  return <>{children(context)}</>;
-};
+// Component that combines all contexts into one
+const AppContextCombiner = ({ children }: { children: ReactNode }) => {
+  const userContext = useUserContext();
+  const matchContext = useMatchContext();
+  const chatContext = useChatContext();
 
-const MatchConsumer = ({ children }: { children: (context: ReturnType<typeof useMatchContext>) => React.ReactNode }) => {
-  const context = useMatchContext();
-  return <>{children(context)}</>;
-};
-
-const ChatConsumer = ({ children }: { children: (context: ReturnType<typeof useChatContext>) => React.ReactNode }) => {
-  const context = useChatContext();
-  return <>{children(context)}</>;
+  // Combine all contexts into one
+  const combinedContext: AppContextType = {
+    // User context - mapeando user para currentUser
+    currentUser: userContext.user,
+    users: userContext.users,
+    login: userContext.login,
+    logout: userContext.logout,
+    updateUserProfile: userContext.updateUserProfile,
+    importPlayerStats: userContext.importPlayerStats,
+    
+    // Match context
+    matches: matchContext.matches,
+    createMatch: matchContext.createMatch,
+    confirmPresence: matchContext.confirmPresence,
+    cancelPresence: matchContext.cancelPresence,
+    sortTeams: matchContext.sortTeams,
+    recordMatchResult: matchContext.recordMatchResult,
+    
+    // Chat context
+    chatMessages: chatContext.chatMessages,
+    sendMessage: chatContext.sendMessage,
+  };
+  
+  return (
+    <AppContext.Provider value={combinedContext}>
+      {children}
+    </AppContext.Provider>
+  );
 };
