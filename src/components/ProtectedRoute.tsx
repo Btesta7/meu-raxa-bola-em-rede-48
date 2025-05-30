@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAppContext } from '@/contexts/AppContext';
+import { useUserContext } from '@/contexts/UserContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,15 +12,27 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireAdmin = false 
 }) => {
-  const { currentUser } = useAppContext();
+  const { user, isLoading } = useUserContext();
+
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Se não há usuário logado, redireciona para login
-  if (!currentUser) {
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   // Se requer admin e o usuário não é admin, redireciona para home
-  if (requireAdmin && currentUser.id !== 'user-1') {
+  if (requireAdmin && !user.isAdmin) {
     return <Navigate to="/" replace />;
   }
 

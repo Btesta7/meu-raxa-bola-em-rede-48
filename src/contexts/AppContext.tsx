@@ -7,7 +7,7 @@ import { ChatProvider, useChatContext } from './ChatContext';
 // Combined context type that re-exports from all subcontexts
 interface AppContextType {
   // From UserContext
-  currentUser: ReturnType<typeof useUserContext>['currentUser'];
+  currentUser: ReturnType<typeof useUserContext>['user'];
   users: ReturnType<typeof useUserContext>['users'];
   login: ReturnType<typeof useUserContext>['login'];
   logout: ReturnType<typeof useUserContext>['logout'];
@@ -51,8 +51,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                     {(chatContext) => {
                       // Combine all contexts into one
                       const combinedContext: AppContextType = {
-                        // User context
-                        currentUser: userContext.currentUser,
+                        // User context - mapeando user para currentUser
+                        currentUser: userContext.user,
                         users: userContext.users,
                         login: userContext.login,
                         logout: userContext.logout,

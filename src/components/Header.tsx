@@ -2,13 +2,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Users, BarChart3, MessageCircle, LogOut } from 'lucide-react';
-import { useAppContext } from '@/contexts/AppContext';
+import { useUserContext } from '@/contexts/UserContext';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const Header = () => {
-  const { currentUser, logout } = useAppContext();
+  const { user, logout } = useUserContext();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -38,17 +38,17 @@ const Header = () => {
             <h1 className="text-xl font-bold">Meu Raxa</h1>
           </div>
           
-          {currentUser && (
+          {user && (
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
-                  <AvatarFallback>{currentUser.name.substring(0, 2)}</AvatarFallback>
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name.substring(0, 2)}</AvatarFallback>
                 </Avatar>
                 <div className="hidden sm:block">
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium">{currentUser.name}</span>
-                    {currentUser.isAdmin && (
+                    <span className="text-sm font-medium">{user.name}</span>
+                    {user.isAdmin && (
                       <Badge variant="secondary" className="text-xs">
                         Admin
                       </Badge>
