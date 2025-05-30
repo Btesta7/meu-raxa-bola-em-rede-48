@@ -5,42 +5,118 @@ import { ImportedStats, PlayerPosition } from '@/types';
 export const parseStatsFromText = (text: string): ImportedStats[] => {
   const stats: ImportedStats[] = [];
   
-  // Split by "Meio-campista" which seems to be a common marker in the data
-  const segments = text.split('Meio-campista');
+  console.log("Texto completo recebido:", text);
   
-  // Process each segment
-  for (let i = 0; i < segments.length; i++) {
-    // Clean up segment
-    const segment = segments[i].trim();
-    if (!segment) continue;
+  // Limpar o texto e dividir em linhas
+  const lines = text.split('\n').filter(line => line.trim().length > 0);
+  console.log("Linhas encontradas:", lines.length);
+  
+  // Pular a primeira linha (cabeçalho) e processar as demais
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
     
-    // Try to extract player name - looking for word characters
-    const nameMatch = segment.match(/([A-Za-zÀ-ÿ\s]{2,})/);
-    const name = nameMatch ? nameMatch[0].trim() : `Jogador ${i+1}`;
+    console.log(`Processando linha ${i}:`, line);
     
-    // Look for numbers that might be stats
-    const numberMatches = segment.match(/\d+/g);
-    const numbers = numberMatches ? numberMatches.map(n => parseInt(n, 10)) : [];
+    // Procurar por "Meio-campista" ou outras posições como marcadores
+    if (line.includes('Meio-campista') || line.includes('Goleiro') || 
+        line.includes('Defensor') || line.includes('Atacante')) {
+      
+      // Extrair dados antes da posição (que seria o nome)
+      const parts = line.split(/\t+|\s{2,}/); // Dividir por tabs ou múltiplos espaços
+      console.log("Partes da linha:", parts);
+      
+      // Tentar identificar o nome (primeira parte não vazia)
+      let name = '';
+      let position: PlayerPosition = 'Meio-campista';
+      let numbers: number[] = [];
+      
+      for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (!trimmedPart) continue;
+        
+        // Se contém posição
+        if (trimmedPart.includes('Meio-campista')) position = 'Meio-campista';
+        else if (trimmedPart.includes('Goleiro')) position = 'Goleiro';
+        else if (trimmedPart.includes('Defensor')) position = 'Defensor';
+        else if (trimmedPart.includes('Atacante')) position = 'Atacante';
+        
+        // Se é um número
+        else if (/^\d+$/.test(trimmedPart)) {
+          numbers.push(parseInt(trimmedPart, 10));
+        }
+        
+        // Se parece com nome (letras)
+        else if (/^[A-Za-zÀ-ÿ\s]+$/.test(trimmedPart) && trimmedPart.length > 1 && !name) {
+          name = trimmedPart;
+        }
+      }
+      
+      // Se não encontrou nome, tentar extrair do início da linha
+      if (!name) {
+        const nameMatch = line.match(/^([A-Za-zÀ-ÿ\s]{2,}?)(?=\s|Meio-campista|Goleiro|Defensor|Atacante)/);
+        if (nameMatch) {
+          name = nameMatch[1].trim();
+        }
+      }
+      
+      // Se ainda não tem nome, usar um nome genérico
+      if (!name || name.length < 2) {
+        name = `Jogador ${i}`;
+      }
+      
+      console.log(`Jogador encontrado: ${name}, Posição: ${position}, Números: ${numbers}`);
+      
+      // Criar estatísticas do jogador
+      const playerStats: ImportedStats = {
+        name,
+        position,
+        goals: numbers[0] || 0,
+        assists: numbers[1] || 0,
+        matches: numbers[2] || 0,
+        wins: numbers[3] || 0,
+        attendance: numbers[4] || 0,
+        yellowCards: numbers[5] || 0,
+        redCards: numbers[6] || 0
+      };
+      
+      // Adicionar apenas se tem um nome válido
+      if (name !== `Jogador ${i}` || numbers.length > 0) {
+        stats.push(playerStats);
+        console.log("Jogador adicionado:", playerStats);
+      }
+    }
     
-    // Create player stats
-    const playerStats: ImportedStats = {
-      name,
-      position: "Meio-campista", // Default position from the marker
-      goals: numbers[0] || 0,
-      assists: numbers[1] || 0,
-      matches: numbers[2] || 0,
-      wins: numbers[3] || 0,
-      attendance: numbers[4] || 0,
-      yellowCards: numbers[5] || 0,
-      redCards: numbers[6] || 0
-    };
-    
-    // Only add if we have a name
-    if (name && name.length > 2 && name !== `Jogador ${i+1}`) {
-      stats.push(playerStats);
+    // Também tentar processar linhas que podem conter dados separados por vírgula ou tab
+    else if (line.includes(',') || line.includes('\t')) {
+      const parts = line.split(/[,\t]+/).map(p => p.trim()).filter(p => p);
+      
+      if (parts.length >= 3) { // Pelo menos nome, posição e um dado
+        const name = parts[0];
+        const position = detectPosition(parts[1] || '') as PlayerPosition;
+        const numbers = parts.slice(2).map(p => parseInt(p, 10)).filter(n => !isNaN(n));
+        
+        if (name.length > 1) {
+          const playerStats: ImportedStats = {
+            name,
+            position,
+            goals: numbers[0] || 0,
+            assists: numbers[1] || 0,
+            matches: numbers[2] || 0,
+            wins: numbers[3] || 0,
+            attendance: numbers[4] || 0,
+            yellowCards: numbers[5] || 0,
+            redCards: numbers[6] || 0
+          };
+          
+          stats.push(playerStats);
+          console.log("Jogador CSV adicionado:", playerStats);
+        }
+      }
     }
   }
   
+  console.log(`Total de jogadores encontrados: ${stats.length}`);
   return stats;
 };
 
