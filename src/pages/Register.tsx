@@ -7,14 +7,18 @@ import AuthLayout from '@/components/auth/AuthLayout';
 import RegisterForm from '@/components/auth/RegisterForm';
 
 const Register = () => {
-  const { isAuthenticated, isLoading } = useUserContext();
+  const { isAuthenticated, isLoading, isNewUser } = useUserContext();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isNewUser) {
+      // Redirect new users to profile
+      navigate('/profile');
+    } else if (isAuthenticated) {
+      // Redirect existing users to dashboard
       navigate('/');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isNewUser, navigate]);
 
   if (isLoading) {
     return (
@@ -38,4 +42,3 @@ const Register = () => {
 };
 
 export default Register;
-

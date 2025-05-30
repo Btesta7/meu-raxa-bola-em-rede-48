@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   email: string;
@@ -137,3 +136,18 @@ export interface AvatarUpload {
   isUploading: boolean;
   error?: string;
 }
+
+interface UserContextType extends AuthState {
+  users: User[];
+  login: (credentials: AuthCredentials) => Promise<boolean>;
+  register: (data: RegisterData) => Promise<boolean>;
+  logout: () => void;
+  isEmailAvailable: (email: string) => boolean;
+  updateUserProfile: (userId: string, updates: Partial<User>) => void;
+  updateUserStats: (userId: string, updates: Partial<User['stats']>) => void;
+  importPlayerStats: (stats: ImportedStats[]) => void;
+  clearError: () => void;
+  isNewUser: boolean;
+}
+
+export { };

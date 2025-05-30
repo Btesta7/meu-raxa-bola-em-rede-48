@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, ImportedStats, AuthCredentials, RegisterData, AuthState } from '../types';
 import { mockUsers } from '../data/mockData';
@@ -16,6 +15,7 @@ interface UserContextType extends AuthState {
   updateUserStats: (userId: string, updates: Partial<User['stats']>) => void;
   importPlayerStats: (stats: ImportedStats[]) => void;
   clearError: () => void;
+  isNewUser: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -37,6 +37,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   });
   
   const [users, setUsers] = useState<User[]>([]);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   // Verificar sessão armazenada ao inicializar
   useEffect(() => {
@@ -125,6 +126,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error: null
       });
 
+      setIsNewUser(false); // Reset new user flag on login
       toast.success(`Bem-vindo, ${user.name}!`);
       return true;
     } catch (error) {
@@ -180,7 +182,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAdmin: false,
         isActive: true,
         createdAt: new Date(),
-        lastLogin: new Date()
+        lastLogin: new Date(),
+        isProfileComplete: false
       };
 
       // Adicionar usuário à lista
@@ -195,6 +198,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error: null
       });
 
+      setIsNewUser(true); // Mark as new user
       toast.success(`Conta criada com sucesso! Bem-vindo, ${newUser.name}!`);
       return true;
     } catch (error) {
@@ -206,6 +210,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = () => {
     clearSession();
+    setIsNewUser(false);
     setAuthState({
       isAuthenticated: false,
       user: null,
@@ -322,7 +327,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     updateUserProfile,
     updateUserStats,
     importPlayerStats,
-    clearError
+    clearError,
+    isNewUser
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
