@@ -1,11 +1,12 @@
-
-
 export interface User {
   id: string;
   name: string;
   position: PlayerPosition;
   avatar: string;
   stats: UserStats;
+  isAdmin?: boolean; // novo campo para identificar administradores
+  age?: number; // novo campo para idade
+  bio?: string; // novo campo para biografia
 }
 
 export type PlayerPosition = 
@@ -63,4 +64,3 @@ export interface ImportedStats {
   yellowCards?: number;
   redCards?: number;
 }
-

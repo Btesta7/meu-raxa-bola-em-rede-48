@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { User, ImportedStats } from '../types';
 import { mockUsers } from '../data/mockData';
@@ -8,6 +7,8 @@ interface UserContextType {
   currentUser: User | null;
   users: User[];
   login: (userId: string) => void;
+  logout: () => void;
+  updateUserProfile: (userId: string, updates: Partial<User>) => void;
   updateUserStats: (userId: string, updates: Partial<User['stats']>) => void;
   importPlayerStats: (stats: ImportedStats[]) => void;
 }
@@ -23,8 +24,11 @@ export const useUserContext = () => {
 };
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(mockUsers[0]);
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [currentUser, setCurrentUser] = useState<User | null>(null); // Mudança: inicia sem usuário logado
+  const [users, setUsers] = useState<User[]>(mockUsers.map(user => ({
+    ...user,
+    isAdmin: user.id === 'user-1' // Definir primeiro usuário como admin
+  })));
 
   const login = (userId: string) => {
     const user = users.find(u => u.id === userId);
@@ -32,6 +36,28 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setCurrentUser(user);
       toast.success(`Bem-vindo, ${user.name}!`);
     }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    toast.success('Você saiu do sistema.');
+  };
+
+  const updateUserProfile = (userId: string, updates: Partial<User>) => {
+    setUsers(prevUsers => 
+      prevUsers.map(user => 
+        user.id === userId 
+          ? { ...user, ...updates } 
+          : user
+      )
+    );
+    
+    // Atualizar currentUser se for o usuário logado
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser(prev => prev ? { ...prev, ...updates } : null);
+    }
+    
+    toast.success('Perfil atualizado com sucesso!');
   };
 
   const updateUserStats = (userId: string, updates: Partial<User['stats']>) => {
@@ -107,6 +133,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     currentUser,
     users,
     login,
+    logout,
+    updateUserProfile,
     updateUserStats,
     importPlayerStats
   };

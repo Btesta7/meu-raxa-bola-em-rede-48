@@ -8,9 +8,11 @@ import Index from "./pages/Index";
 import Players from "./pages/Players";
 import Stats from "./pages/Stats";
 import Chat from "./pages/Chat";
+import Login from "./pages/Login";
 import MatchDetails from "./pages/MatchDetails";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./contexts/AppContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,11 +24,32 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/players" element={<Players />} />
-            <Route path="/stats" element={<Stats />} />
-            <Route path="/chat" element={<Chat />} />
-            <Route path="/match/:matchId" element={<MatchDetails />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } />
+            <Route path="/players" element={
+              <ProtectedRoute>
+                <Players />
+              </ProtectedRoute>
+            } />
+            <Route path="/stats" element={
+              <ProtectedRoute>
+                <Stats />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            } />
+            <Route path="/match/:matchId" element={
+              <ProtectedRoute>
+                <MatchDetails />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

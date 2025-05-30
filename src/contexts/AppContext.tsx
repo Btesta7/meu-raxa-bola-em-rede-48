@@ -10,6 +10,8 @@ interface AppContextType {
   currentUser: ReturnType<typeof useUserContext>['currentUser'];
   users: ReturnType<typeof useUserContext>['users'];
   login: ReturnType<typeof useUserContext>['login'];
+  logout: ReturnType<typeof useUserContext>['logout'];
+  updateUserProfile: ReturnType<typeof useUserContext>['updateUserProfile'];
   importPlayerStats: ReturnType<typeof useUserContext>['importPlayerStats'];
   
   // From MatchContext
@@ -53,6 +55,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
                         currentUser: userContext.currentUser,
                         users: userContext.users,
                         login: userContext.login,
+                        logout: userContext.logout,
+                        updateUserProfile: userContext.updateUserProfile,
                         importPlayerStats: userContext.importPlayerStats,
                         
                         // Match context
