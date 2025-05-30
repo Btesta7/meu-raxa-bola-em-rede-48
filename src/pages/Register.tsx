@@ -12,9 +12,9 @@ const Register = () => {
 
   useEffect(() => {
     if (isAuthenticated && isNewUser) {
-      // Redirect new users to profile
+      // Redirect new users to profile immediately
       navigate('/profile');
-    } else if (isAuthenticated) {
+    } else if (isAuthenticated && !isNewUser) {
       // Redirect existing users to dashboard
       navigate('/');
     }
@@ -29,6 +29,11 @@ const Register = () => {
         </div>
       </div>
     );
+  }
+
+  // Don't render the form if user is already authenticated
+  if (isAuthenticated) {
+    return null;
   }
 
   return (

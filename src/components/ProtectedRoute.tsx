@@ -12,7 +12,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireAdmin = false 
 }) => {
-  const { user, isLoading } = useUserContext();
+  const { user, isLoading, isNewUser } = useUserContext();
 
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {
@@ -29,6 +29,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Se não há usuário logado, redireciona para login
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Se é um novo usuário e não está na página de perfil, redirecionar para o perfil
+  if (isNewUser && window.location.pathname !== '/profile') {
+    return <Navigate to="/profile" replace />;
   }
 
   // Se requer admin e o usuário não é admin, redireciona para home
