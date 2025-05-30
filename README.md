@@ -1,73 +1,266 @@
-# Welcome to your Lovable project
 
-## Project info
+# Meu Raxa - Aplicativo de Gestão de Futebol Amateur
 
-**URL**: https://lovable.dev/projects/e6061a4f-d663-4d95-8c60-19311691b139
+## Visão Geral
 
-## How can I edit this code?
+Meu Raxa é um aplicativo web para gerenciar partidas de futebol amateur, permitindo que jogadores se organizem, confirmem presença, acompanhem estatísticas e interajam através de um sistema de chat.
 
-There are several ways of editing your application.
+## Funcionalidades Principais
 
-**Use Lovable**
+### 🔐 Sistema de Autenticação
+- Login por seleção de perfil de jogador
+- Sistema de proteção de rotas
+- Diferenciação entre usuários comuns e administradores
+- Logout com redirecionamento automático
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e6061a4f-d663-4d95-8c60-19311691b139) and start prompting.
+### 👥 Gestão de Jogadores
+- Perfis completos com foto, nome, posição e estatísticas
+- Importação de estatísticas via arquivo CSV
+- Edição de perfil (nome, idade, biografia, foto)
+- Sistema de permissões (admin vs usuário comum)
 
-Changes made via Lovable will be committed automatically to this repo.
+### ⚽ Gestão de Partidas
+- Criação de partidas (apenas administradores)
+- Confirmação/cancelamento de presença
+- Sorteio automático de times
+- Registro de resultados das partidas
+- Histórico de partidas com detalhes
 
-**Use your preferred IDE**
+### 📊 Estatísticas
+- Estatísticas individuais (gols, assistências, cartões, etc.)
+- Gráficos de desempenho
+- Taxa de presença
+- Histórico de participações
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 💬 Sistema de Chat
+- Chat em tempo real entre jogadores
+- Mensagens com timestamp
+- Avatar e nome do usuário
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Estrutura do Projeto
 
-Follow these steps:
+### Tecnologias Utilizadas
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Roteamento**: React Router DOM
+- **Estado Global**: React Context API
+- **Consultas**: TanStack React Query
+- **Icons**: Lucide React
+- **Gráficos**: Recharts
+- **Processamento PDF**: pdfjs-dist
+- **Notificações**: Sonner (toast)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Arquitetura de Pastas
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+src/
+├── components/          # Componentes reutilizáveis
+│   ├── ui/             # Componentes base do shadcn/ui
+│   ├── Header.tsx      # Cabeçalho com navegação
+│   ├── ProtectedRoute.tsx # Proteção de rotas
+│   ├── MatchCard.tsx   # Card de partida
+│   ├── PlayerCard.tsx  # Card de jogador
+│   └── ...
+├── contexts/           # Contextos do React
+│   ├── AppContext.tsx  # Context principal (combina todos)
+│   ├── UserContext.tsx # Gestão de usuários
+│   ├── MatchContext.tsx # Gestão de partidas
+│   └── ChatContext.tsx # Gestão de chat
+├── pages/              # Páginas da aplicação
+│   ├── Login.tsx       # Tela de login
+│   ├── Index.tsx       # Dashboard/Partidas
+│   ├── Players.tsx     # Lista de jogadores
+│   ├── Stats.tsx       # Estatísticas
+│   ├── Chat.tsx        # Chat dos jogadores
+│   └── ...
+├── types/              # Definições TypeScript
+│   └── index.ts        # Interfaces principais
+├── services/           # Serviços e utilitários
+│   └── importService.ts # Importação de dados CSV
+└── data/              # Dados mock
+    └── mockData.ts    # Dados de exemplo
 ```
 
-**Edit a file directly in GitHub**
+### Principais Interfaces TypeScript
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```typescript
+// Usuário/Jogador
+interface User {
+  id: string;
+  name: string;
+  position: PlayerPosition;
+  avatar: string;
+  stats: UserStats;
+  isAdmin?: boolean;
+  age?: number;
+  bio?: string;
+}
 
-**Use GitHub Codespaces**
+// Estatísticas do jogador
+interface UserStats {
+  goals: number;
+  assists: number;
+  matches: number;
+  wins: number;
+  attendance: number;
+  yellowCards: number;
+  redCards: number;
+}
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+// Partida
+interface Match {
+  id: string;
+  date: string;
+  time: string;
+  location: string;
+  maxPlayers: number;
+  confirmedPlayers: User[];
+  teams?: { teamA: User[]; teamB: User[]; };
+  status: "scheduled" | "completed" | "canceled";
+  result?: { teamAScore: number; teamBScore: number; };
+}
+```
 
-## What technologies are used for this project?
+## Funcionalidades Implementadas
 
-This project is built with:
+### ✅ Concluído
+- [x] Sistema de login com seleção de perfil
+- [x] Proteção de rotas
+- [x] Gestão básica de usuários
+- [x] Importação de estatísticas via CSV
+- [x] Context API para estado global
+- [x] Navegação entre páginas
+- [x] Header responsivo com logout
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🚧 Em Desenvolvimento
+- [ ] Página de perfil do jogador
+- [ ] Edição de perfil completa
+- [ ] Gráficos de desempenho individual
+- [ ] Sistema completo de criação de partidas (apenas admin)
+- [ ] Restrições de edição baseadas em permissões
 
-## How can I deploy this project?
+### 📋 Próximas Funcionalidades
+- [ ] Notificações push
+- [ ] Histórico detalhado de partidas
+- [ ] Sistema de ranking
+- [ ] Exportação de relatórios
+- [ ] Modo escuro
 
-Simply open [Lovable](https://lovable.dev/projects/e6061a4f-d663-4d95-8c60-19311691b139) and click on Share -> Publish.
+## Contextos da Aplicação
 
-## Can I connect a custom domain to my Lovable project?
+### AppContext (Principal)
+Combina todos os contextos e fornece acesso unificado a:
+- Gestão de usuários (login, logout, perfil)
+- Gestão de partidas (criar, confirmar presença, resultados)
+- Sistema de chat (mensagens)
 
-Yes, you can!
+### UserContext
+- Lista de usuários
+- Usuário logado atual
+- Funções de autenticação
+- Atualização de perfis
+- Importação de estatísticas
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### MatchContext
+- Lista de partidas
+- Criação e edição de partidas
+- Confirmação de presença
+- Sorteio de times
+- Registro de resultados
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+### ChatContext
+- Mensagens do chat
+- Envio de novas mensagens
+- Histórico de conversas
+
+## Permissões e Segurança
+
+### Usuário Administrador (Admin)
+- Pode criar/editar/cancelar partidas
+- Pode editar qualquer perfil de jogador
+- Pode importar estatísticas
+- Acesso total a todas as funcionalidades
+
+### Usuário Comum (Jogador)
+- Pode editar apenas seu próprio perfil
+- Pode confirmar/cancelar presença em partidas
+- Pode visualizar estatísticas de todos
+- Pode participar do chat
+
+## Importação de Dados
+
+### Formato CSV Suportado
+O sistema suporta importação via CSV com as seguintes colunas:
+```
+Nome;Jogos;Vitórias;Gols;Assistências
+```
+
+### Processo de Importação
+1. Upload do arquivo CSV
+2. Parsing automático pulando header
+3. Atualização de jogadores existentes
+4. Criação de novos jogadores
+5. Feedback de sucesso com contadores
+
+## Como Contribuir
+
+### Para Outras IAs
+
+1. **Analise o código existente** antes de fazer alterações
+2. **Mantenha a consistência** com os padrões estabelecidos
+3. **Use TypeScript** corretamente seguindo as interfaces
+4. **Teste as funcionalidades** após implementar
+5. **Mantenha os contextos organizados** - não misture responsabilidades
+6. **Siga o princípio de responsabilidade única** para componentes
+
+### Padrões de Código
+
+- **Componentes**: Usar functional components com hooks
+- **Estado**: Preferir Context API para estado global
+- **Styling**: Usar Tailwind CSS + shadcn/ui
+- **Tipos**: Sempre tipar corretamente com TypeScript
+- **Nomenclatura**: CamelCase para components, kebab-case para arquivos
+
+### Estrutura de Commits
+- `feat:` Nova funcionalidade
+- `fix:` Correção de bug
+- `refactor:` Refatoração de código
+- `style:` Mudanças de estilo/UI
+- `docs:` Documentação
+
+## Comandos Úteis
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar desenvolvimento
+npm run dev
+
+# Build para produção
+npm run build
+
+# Preview da build
+npm run preview
+```
+
+## Estado Atual do Projeto
+
+O projeto está na fase inicial com sistema de autenticação básico implementado. O próximo passo é desenvolver a página de perfil do jogador e expandir as funcionalidades de administração.
+
+### Arquivos Importantes
+- `src/types/index.ts` - Todas as interfaces TypeScript
+- `src/contexts/AppContext.tsx` - Context principal
+- `src/pages/Login.tsx` - Sistema de autenticação
+- `src/components/ProtectedRoute.tsx` - Proteção de rotas
+- `src/services/importService.ts` - Importação de dados
+
+## Observações para Desenvolvimento
+
+1. **Sempre verificar permissões** antes de permitir ações (admin vs usuário)
+2. **Manter responsividade** em todos os componentes
+3. **Usar toast notifications** para feedback ao usuário
+4. **Validar dados** antes de salvar no contexto
+5. **Manter performance** - evitar re-renders desnecessários
+
+Este projeto visa ser uma solução completa para gestão de futebol amateur, com foco na experiência do usuário e facilidade de uso.
