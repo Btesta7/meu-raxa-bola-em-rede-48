@@ -21,16 +21,16 @@ export const useChatContext = () => {
 
 export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(mockChatMessages);
-  const { currentUser } = useUserContext();
+  const { user } = useUserContext();
 
   const sendMessage = (message: string) => {
-    if (!currentUser || !message.trim()) return;
+    if (!user || !message.trim()) return;
 
     const newMessage: ChatMessage = {
       id: `${chatMessages.length + 1}`,
-      userId: currentUser.id,
-      userName: currentUser.name,
-      userAvatar: currentUser.avatar,
+      userId: user.id,
+      userName: user.name,
+      userAvatar: user.avatar,
       message: message.trim(),
       timestamp: new Date().toISOString()
     };

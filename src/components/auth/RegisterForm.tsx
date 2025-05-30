@@ -245,7 +245,7 @@ const RegisterForm: React.FC = () => {
           <Checkbox
             id="terms"
             checked={acceptedTerms}
-            onCheckedChange={setAcceptedTerms}
+            onCheckedChange={(checked) => setAcceptedTerms(checked === true)}
             disabled={isLoading}
             className="mt-1"
           />
@@ -284,4 +284,3 @@ const RegisterForm: React.FC = () => {
 };
 
 export default RegisterForm;
-

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Match, User } from '../types';
 import { mockMatches } from '../data/mockData';
@@ -25,13 +26,13 @@ export const useMatchContext = () => {
 
 export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [matches, setMatches] = useState<Match[]>(mockMatches);
-  const { currentUser, users, updateUserStats } = useUserContext();
+  const { user, users, updateUserStats } = useUserContext();
 
   const createMatch = (matchData: Omit<Match, 'id' | 'confirmedPlayers'>) => {
     const newMatch: Match = {
       ...matchData,
       id: `${matches.length + 1}`,
-      confirmedPlayers: currentUser ? [currentUser] : [],
+      confirmedPlayers: user ? [user] : [],
     };
 
     setMatches([...matches, newMatch]);
@@ -39,7 +40,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const confirmPresence = (matchId: string) => {
-    if (!currentUser) return;
+    if (!user) return;
 
     setMatches(matches.map(match => {
       if (match.id === matchId) {
@@ -48,7 +49,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           return match;
         }
         
-        if (match.confirmedPlayers.some(player => player.id === currentUser.id)) {
+        if (match.confirmedPlayers.some(player => player.id === user.id)) {
           toast.info('Você já está confirmado nesta partida.');
           return match;
         }
@@ -56,7 +57,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         toast.success('Presença confirmada!');
         return {
           ...match,
-          confirmedPlayers: [...match.confirmedPlayers, currentUser],
+          confirmedPlayers: [...match.confirmedPlayers, user],
         };
       }
       return match;
@@ -64,7 +65,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const cancelPresence = (matchId: string) => {
-    if (!currentUser) return;
+    if (!user) return;
 
     setMatches(matches.map(match => {
       if (match.id === matchId) {
@@ -72,7 +73,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         return {
           ...match,
           confirmedPlayers: match.confirmedPlayers.filter(
-            player => player.id !== currentUser.id
+            player => player.id !== user.id
           ),
         };
       }
