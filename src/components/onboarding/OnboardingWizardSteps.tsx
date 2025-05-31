@@ -131,7 +131,6 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
   };
 
   const currentStepData = steps[currentStep];
-  const StepComponent = currentStepData.component;
 
   // Render the current step with appropriate props
   const renderCurrentStep = () => {
@@ -142,19 +141,25 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
       onPrevious: handlePrevious
     };
 
-    // Special handling for the emergency contact step
-    if (currentStep === steps.length - 1) {
-      return (
-        <StepEmergencyContact
-          {...baseProps}
-          onComplete={handleFinalComplete}
-          isSubmitting={isSubmitting}
-        />
-      );
+    // Render each step component with the correct props
+    switch (currentStep) {
+      case 0:
+        return <StepBasicInfo {...baseProps} />;
+      case 1:
+        return <StepPlayerInfo {...baseProps} />;
+      case 2:
+        return <StepAvatarBio {...baseProps} />;
+      case 3:
+        return (
+          <StepEmergencyContact
+            {...baseProps}
+            onComplete={handleFinalComplete}
+            isSubmitting={isSubmitting}
+          />
+        );
+      default:
+        return null;
     }
-
-    // For other steps, use the base props
-    return <StepComponent {...baseProps} />;
   };
 
   return (
