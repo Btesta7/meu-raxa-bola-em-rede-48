@@ -15,7 +15,6 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
 import MatchDetails from "./pages/MatchDetails";
-import LiveMatch from "./pages/LiveMatch";
 import NotFound from "./pages/NotFound";
 import { AppProvider } from "./contexts/AppContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
