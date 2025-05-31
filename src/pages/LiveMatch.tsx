@@ -30,6 +30,14 @@ export default function LiveMatch() {
     return saved ? JSON.parse(saved) : INITIAL_STATE;
   });
 
+  const [pendingAssist, setPendingAssist] = useState<{
+    goalEvent: MatchEvent | null;
+    isWaiting: boolean;
+  }>({
+    goalEvent: null,
+    isWaiting: false
+  });
+
   // Salvar no localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(matchState));
@@ -220,21 +228,21 @@ export default function LiveMatch() {
       };
     });
 
+    // Ativar seleção de assistência
+    setPendingAssist({
+      goalEvent,
+      isWaiting: true
+    });
+
     toast.success(`⚽ GOL! ${player.name} (${team.name})`);
   };
 
   // Handler para assistências
   const handleAssistAdded = (assistPlayer: Player | null) => {
-    if (!matchState.session.currentMatch) return;
-
-    const lastGoal = [...matchState.session.currentMatch.events]
-      .reverse()
-      .find(event => event.type === 'goal');
-
-    if (!lastGoal) return;
+    if (!pendingAssist.goalEvent) return;
 
     const updatedEvent: MatchEvent = {
-      ...lastGoal,
+      ...pendingAssist.goalEvent,
       assistPlayerId: assistPlayer?.id,
       assistPlayerName: assistPlayer?.name
     };
@@ -251,6 +259,12 @@ export default function LiveMatch() {
         } : null
       }
     }));
+
+    // Limpar assistência pendente
+    setPendingAssist({
+      goalEvent: null,
+      isWaiting: false
+    });
 
     if (assistPlayer) {
       toast.success(`👏 Assistência de ${assistPlayer.name}!`);
@@ -301,7 +315,7 @@ export default function LiveMatch() {
       finalScore: matchState.session.currentMatch.score,
       winner: matchState.session.currentMatch.winner,
       events: matchState.session.currentMatch.events,
-      duration: matchState.session.currentMatch.timer.seconds,
+      duration: 420 - matchState.session.currentMatch.timer.seconds,
       timestamp: new Date()
     };
 
@@ -415,10 +429,7 @@ export default function LiveMatch() {
               teamA={matchState.session.currentMatch.teamA}
               teamB={matchState.session.currentMatch.teamB}
               onGoalScored={handleGoalScored}
-              pendingAssist={{
-                goalEvent: null,
-                isWaiting: false
-              }}
+              pendingAssist={pendingAssist}
               onAssistAdded={handleAssistAdded}
               scoreA={matchState.session.currentMatch.score.teamA}
               scoreB={matchState.session.currentMatch.score.teamB}
@@ -442,6 +453,17 @@ export default function LiveMatch() {
               events={matchState.session.currentMatch.events}
               onUndoEvent={handleUndoEvent}
             />
+
+            {/* Botão de Reset de Emergência */}
+            <div className="text-center mt-8">
+              <Button
+                onClick={handleCompleteReset}
+                variant="outline"
+                className="text-red-400 border-red-400 hover:bg-red-400 hover:text-white"
+              >
+                🔄 RESETAR SISTEMA COMPLETO
+              </Button>
+            </div>
           </div>
         </div>
       );

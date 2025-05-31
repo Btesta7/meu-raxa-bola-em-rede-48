@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Team, Player, MatchEvent } from "@/types/liveMatch";
+import { useState } from "react";
 
 interface GoalTrackerProps {
   teamA: Team;
@@ -26,6 +27,25 @@ export const GoalTracker = ({
   scoreB,
   winner
 }: GoalTrackerProps) => {
+  const [pendingGoal, setPendingGoal] = useState<{player: Player, team: Team} | null>(null);
+
+  // Função para marcar gol e abrir seleção de assistência
+  const handleGoalClick = (player: Player, team: Team) => {
+    if (winner) return;
+    
+    // Marcar o gol primeiro
+    onGoalScored(player, team);
+    
+    // Definir gol pendente para assistência
+    setPendingGoal({player, team});
+  };
+
+  // Função para marcar assistência
+  const handleAssistClick = (assistPlayer: Player | null) => {
+    onAssistAdded(assistPlayer);
+    setPendingGoal(null);
+  };
+
   // Não permitir marcar gols se já houver um vencedor
   if (winner) {
     return (
@@ -40,9 +60,8 @@ export const GoalTracker = ({
     );
   }
 
-  if (pendingAssist.isWaiting && pendingAssist.goalEvent) {
-    const goalTeam = pendingAssist.goalEvent.teamId === teamA.id ? teamA : teamB;
-    
+  // Se há gol pendente para assistência
+  if (pendingGoal) {
     return (
       <div className="bg-white/10 backdrop-blur p-6 rounded-lg shadow-lg border-2 border-orange-500">
         <h3 className="text-2xl font-bold text-center mb-4 text-white">
@@ -51,7 +70,7 @@ export const GoalTracker = ({
         
         <div className="text-center mb-4">
           <p className="text-lg text-white">
-            Gol de <strong className="text-green-400">{pendingAssist.goalEvent.playerName}</strong> ({goalTeam.name})
+            Gol de <strong className="text-green-400">{pendingGoal.player.name}</strong> ({pendingGoal.team.name})
           </p>
           <p className="text-sm text-gray-300">Quem deu a assistência?</p>
         </div>
@@ -60,18 +79,18 @@ export const GoalTracker = ({
           <div>
             <h4 
               className="text-lg font-semibold mb-3 text-center"
-              style={{ color: goalTeam.color === '#FFFFFF' ? '#fff' : goalTeam.color }}
+              style={{ color: pendingGoal.team.color === '#FFFFFF' ? '#fff' : pendingGoal.team.color }}
             >
-              <span className="text-2xl mr-2">{goalTeam.logo}</span>
-              {goalTeam.name}
+              <span className="text-2xl mr-2">{pendingGoal.team.logo}</span>
+              {pendingGoal.team.name}
             </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {goalTeam.players
-                .filter(player => player.id !== pendingAssist.goalEvent?.playerId)
+              {pendingGoal.team.players
+                .filter(player => player.id !== pendingGoal.player.id)
                 .map((player) => (
                 <Button
                   key={player.id}
-                  onClick={() => onAssistAdded(player)}
+                  onClick={() => handleAssistClick(player)}
                   className="p-3 text-sm font-medium bg-blue-600/80 hover:bg-blue-700 text-white border border-blue-400 h-auto"
                 >
                   <div className="text-center">
@@ -85,7 +104,7 @@ export const GoalTracker = ({
           
           <div className="text-center">
             <Button
-              onClick={() => onAssistAdded(null)}
+              onClick={() => handleAssistClick(null)}
               className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white"
             >
               SEM ASSISTÊNCIA
@@ -140,7 +159,7 @@ export const GoalTracker = ({
             {teamA.players.map((player) => (
               <Button
                 key={player.id}
-                onClick={() => onGoalScored(player, teamA)}
+                onClick={() => handleGoalClick(player, teamA)}
                 className="p-4 text-sm font-medium bg-green-600/80 hover:bg-green-700 text-white border border-green-400 h-auto transition-all duration-200 hover:scale-105"
               >
                 <div className="text-center w-full">
@@ -172,7 +191,7 @@ export const GoalTracker = ({
             {teamB.players.map((player) => (
               <Button
                 key={player.id}
-                onClick={() => onGoalScored(player, teamB)}
+                onClick={() => handleGoalClick(player, teamB)}
                 className="p-4 text-sm font-medium bg-green-600/80 hover:bg-green-700 text-white border border-green-400 h-auto transition-all duration-200 hover:scale-105"
               >
                 <div className="text-center w-full">
