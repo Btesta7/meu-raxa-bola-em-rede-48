@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { MapPin, Clock, Users, ArrowLeft, Shuffle, Trophy } from 'lucide-react';
+import { MapPin, Clock, Users, ArrowLeft, Shuffle, Trophy, Play } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
 import Header from '@/components/Header';
 import TeamsList from '@/components/TeamsList';
@@ -71,8 +70,13 @@ const MatchDetails = () => {
     if (matchId) recordMatchResult(matchId, teamAScore, teamBScore);
     setIsResultDialogOpen(false);
   };
+
+  const handleStartLiveMatch = () => {
+    navigate(`/live-match/${matchId}`);
+  };
   
   const percentFilled = (match.confirmedPlayers.length / match.maxPlayers) * 100;
+  const hasEnoughPlayers = match.confirmedPlayers.length >= 15;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -128,6 +132,16 @@ const MatchDetails = () => {
                 </Button>
               )}
               
+              {hasEnoughPlayers && (
+                <Button 
+                  onClick={handleStartLiveMatch}
+                  className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Play size={16} />
+                  <span>Iniciar Partida ao Vivo</span>
+                </Button>
+              )}
+              
               {match.confirmedPlayers.length >= 4 && (
                 <Button 
                   variant="outline" 
@@ -148,6 +162,15 @@ const MatchDetails = () => {
                   <span>Registrar resultado</span>
                 </Button>
               )}
+            </div>
+          )}
+
+          {hasEnoughPlayers && (
+            <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-700 font-medium flex items-center gap-2">
+                <Play size={16} />
+                Partida pronta para modo ao vivo! (15 jogadores confirmados)
+              </p>
             </div>
           )}
           

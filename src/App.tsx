@@ -17,6 +17,7 @@ import Onboarding from "./pages/Onboarding";
 import MatchDetails from "./pages/MatchDetails";
 import LiveMatch from "./pages/LiveMatch";
 import NotFound from "./pages/NotFound";
+import { LiveMatchFlow } from "./components/live-match/LiveMatchFlow";
 import { AppProvider } from "./contexts/AppContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { AuditProvider } from "./contexts/AuditContext";
@@ -39,6 +40,11 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/live-match" element={<LiveMatch />} />
+                <Route path="/live-match/:matchId" element={
+                  <ProtectedRoute>
+                    <LiveMatchFlow />
+                  </ProtectedRoute>
+                } />
                 <Route path="/onboarding" element={
                   <ProtectedRoute>
                     <Onboarding />
