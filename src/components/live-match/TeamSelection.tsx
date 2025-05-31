@@ -1,7 +1,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Team, TEAMS } from "@/types/liveMatch";
+import { Team, TEAMS_CONFIG } from "@/types/liveMatch";
 
 interface TeamSelectionProps {
   teamA: Team | null;
@@ -18,8 +18,8 @@ export const TeamSelection = ({
   onTeamBSelect,
   onStartMatch
 }: TeamSelectionProps) => {
-  const availableTeamsForB = Object.values(TEAMS).filter(team => team.id !== teamA?.id);
-  const availableTeamsForA = Object.values(TEAMS).filter(team => team.id !== teamB?.id);
+  const availableTeamsForB = Object.values(TEAMS_CONFIG).filter(team => team.id !== teamA?.id);
+  const availableTeamsForA = Object.values(TEAMS_CONFIG).filter(team => team.id !== teamB?.id);
   
   const canStartMatch = teamA && teamB && teamA.id !== teamB.id;
 
@@ -32,7 +32,7 @@ export const TeamSelection = ({
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-center mb-6">
         <div className="flex-1 min-w-48">
           <label className="block text-sm font-medium mb-2 text-gray-700">Time A</label>
-          <Select value={teamA?.id || ""} onValueChange={(value) => onTeamASelect(TEAMS[value])}>
+          <Select value={teamA?.id || ""} onValueChange={(value) => onTeamASelect(TEAMS_CONFIG[value] as Team)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o Time A" />
             </SelectTrigger>
@@ -56,7 +56,7 @@ export const TeamSelection = ({
 
         <div className="flex-1 min-w-48">
           <label className="block text-sm font-medium mb-2 text-gray-700">Time B</label>
-          <Select value={teamB?.id || ""} onValueChange={(value) => onTeamBSelect(TEAMS[value])}>
+          <Select value={teamB?.id || ""} onValueChange={(value) => onTeamBSelect(TEAMS_CONFIG[value] as Team)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Selecione o Time B" />
             </SelectTrigger>
