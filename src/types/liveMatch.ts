@@ -4,12 +4,17 @@ export interface Player {
   name: string;
   number?: number;
   position?: string;
+  skillLevel?: number; // 1-5 para balanceamento
 }
 
 export interface Team {
   id: string;
   name: string;
+  shortName: string;
   color: string;
+  secondaryColor: string;
+  logo: string;
+  gradient: string;
   players: Player[];
 }
 
@@ -26,61 +31,103 @@ export interface MatchEvent {
   timestamp: Date;
 }
 
-export interface MatchState {
-  teamA: Team | null;
-  teamB: Team | null;
-  score: {
-    teamA: number;
-    teamB: number;
-  };
-  timer: {
-    seconds: number;
-    isRunning: boolean;
-    isPaused: boolean;
-  };
+export interface CompletedMatch {
+  id: string;
+  teamA: Team;
+  teamB: Team;
+  finalScore: { teamA: number; teamB: number };
+  winner: Team;
   events: MatchEvent[];
-  isMatchStarted: boolean;
-  pendingAssist: {
-    goalEvent: MatchEvent | null;
-    isWaiting: boolean;
-  };
+  duration: number;
+  timestamp: Date;
 }
 
-export const TEAMS: Record<string, Team> = {
+export interface MatchSession {
+  id: string;
+  confirmedPlayers: Player[];
+  teams: Team[];
+  currentMatch: {
+    teamA: Team;
+    teamB: Team;
+    waitingTeam: Team;
+    score: { teamA: number; teamB: number };
+    events: MatchEvent[];
+    timer: { seconds: number; isRunning: boolean; isPaused: boolean };
+    winner: Team | null;
+  } | null;
+  matchHistory: CompletedMatch[];
+}
+
+export interface MatchState {
+  phase: 'setup' | 'team-selection' | 'live-match' | 'match-ended';
+  session: MatchSession;
+}
+
+export const TEAMS_CONFIG: Record<string, Omit<Team, 'players'>> = {
   barcelona: {
     id: 'barcelona',
     name: 'Barcelona',
+    shortName: 'BAR',
     color: '#A50044',
-    players: [
-      { id: '1', name: 'Messi', number: 10 },
-      { id: '2', name: 'Pedri', number: 8 },
-      { id: '3', name: 'Gavi', number: 6 },
-      { id: '4', name: 'Lewandowski', number: 9 },
-      { id: '5', name: 'Raphinha', number: 11 }
-    ]
+    secondaryColor: '#004D98',
+    logo: '🔴',
+    gradient: 'linear-gradient(45deg, #A50044, #004D98)'
   },
   realMadrid: {
     id: 'realMadrid',
     name: 'Real Madrid',
+    shortName: 'RMA',
     color: '#FFFFFF',
-    players: [
-      { id: '6', name: 'Benzema', number: 9 },
-      { id: '7', name: 'Modrić', number: 10 },
-      { id: '8', name: 'Kroos', number: 8 },
-      { id: '9', name: 'Vinicius Jr.', number: 7 },
-      { id: '10', name: 'Rodrygo', number: 11 }
-    ]
+    secondaryColor: '#000000',
+    logo: '⚪',
+    gradient: 'linear-gradient(45deg, #FFFFFF, #E5E5E5)'
   },
   manchesterCity: {
     id: 'manchesterCity',
     name: 'Manchester City',
+    shortName: 'MCI',
     color: '#6CABDD',
-    players: [
-      { id: '11', name: 'Haaland', number: 9 },
-      { id: '12', name: 'De Bruyne', number: 17 },
-      { id: '13', name: 'Bernardo Silva', number: 20 },
-      { id: '14', name: 'Grealish', number: 10 },
-      { id: '15', name: 'Mahrez', number: 26 }
-    ]
+    secondaryColor: '#1C2C5B',
+    logo: '🔵',
+    gradient: 'linear-gradient(45deg, #6CABDD, #1C2C5B)'
   }
 };
+
+// Jogadores exemplo para demonstração
+export const DEMO_PLAYERS: Player[] = [
+  { id: '1', name: 'João Silva', skillLevel: 5 },
+  { id: '2', name: 'Pedro Costa', skillLevel: 4 },
+  { id: '3', name: 'Carlos Lima', skillLevel: 4 },
+  { id: '4', name: 'Rafael Santos', skillLevel: 3 },
+  { id: '5', name: 'Miguel Ramos', skillLevel: 5 },
+  { id: '6', name: 'Lucas Oliveira', skillLevel: 3 },
+  { id: '7', name: 'André Souza', skillLevel: 4 },
+  { id: '8', name: 'Felipe Martins', skillLevel: 3 },
+  { id: '9', name: 'Bruno Alves', skillLevel: 2 },
+  { id: '10', name: 'Diego Ferreira', skillLevel: 4 },
+  { id: '11', name: 'Thiago Rocha', skillLevel: 3 },
+  { id: '12', name: 'Gabriel Pereira', skillLevel: 2 },
+  { id: '13', name: 'Leonardo Cruz', skillLevel: 4 },
+  { id: '14', name: 'Mateus Barbosa', skillLevel: 3 },
+  { id: '15', name: 'Ricardo Gomes', skillLevel: 2 }
+];
+
+export function balancedTeamSort(players: Player[]): Team[] {
+  const sortedPlayers = [...players].sort((a, b) => (b.skillLevel || 3) - (a.skillLevel || 3));
+  
+  const teams: Team[] = [
+    { ...TEAMS_CONFIG.barcelona, players: [] },
+    { ...TEAMS_CONFIG.realMadrid, players: [] },
+    { ...TEAMS_CONFIG.manchesterCity, players: [] }
+  ];
+  
+  // Distribuição serpentina para balanceamento
+  for (let i = 0; i < sortedPlayers.length; i++) {
+    const teamIndex = Math.floor(i / 5) % 2 === 0 
+      ? i % 3 
+      : 2 - (i % 3);
+    teams[teamIndex].players.push(sortedPlayers[i]);
+  }
+  
+  return teams;
+}
