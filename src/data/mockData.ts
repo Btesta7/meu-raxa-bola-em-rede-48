@@ -19,6 +19,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: true, // Primeiro usuário é admin
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-01-15'),
     lastLogin: new Date('2025-05-29')
   },
@@ -39,6 +40,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-02-10'),
     lastLogin: new Date('2025-05-28')
   },
@@ -59,6 +61,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-01-20'),
     lastLogin: new Date('2025-05-27')
   },
@@ -79,6 +82,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-03-05'),
     lastLogin: new Date('2025-05-26')
   },
@@ -99,6 +103,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-02-28'),
     lastLogin: new Date('2025-05-25')
   },
@@ -119,6 +124,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-03-12'),
     lastLogin: new Date('2025-05-24')
   },
@@ -139,6 +145,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-01-30'),
     lastLogin: new Date('2025-05-23')
   },
@@ -159,6 +166,7 @@ export const mockUsers: User[] = [
     },
     isAdmin: false,
     isActive: true,
+    isProfileComplete: true,
     createdAt: new Date('2024-04-02'),
     lastLogin: new Date('2025-05-22')
   }
