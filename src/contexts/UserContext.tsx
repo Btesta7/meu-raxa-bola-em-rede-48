@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, ImportedStats, AuthCredentials, RegisterData, AuthState, OnboardingData } from '../types';
 import { mockUsers } from '../data/mockData';
@@ -55,14 +54,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Carregar usuários mock
-        setUsers(mockUsers);
+        // Carregar usuários mock (incluindo admins)
+        const updatedMockUsers = mockUsers.map(user => ({
+          ...user,
+          isAdmin: user.id === '1' || user.id === '2' // Fazer os primeiros dois usuários admins
+        }));
+        setUsers(updatedMockUsers);
         
         // Verificar se há sessão armazenada
         const storedUser = getStoredSession();
         if (storedUser) {
           // Verificar se o usuário ainda existe na base de dados
-          const userExists = mockUsers.find(u => u.id === storedUser.id && u.email === storedUser.email);
+          const userExists = updatedMockUsers.find(u => u.id === storedUser.id && u.email === storedUser.email);
           if (userExists) {
             setAuthState({
               isAuthenticated: true,
