@@ -3,6 +3,9 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { UserProvider, useUserContext } from './UserContext';
 import { MatchProvider, useMatchContext } from './MatchContext';
 import { ChatProvider, useChatContext } from './ChatContext';
+import { PreferencesProvider } from './PreferencesContext';
+import { NotificationProvider } from './NotificationContext';
+import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider';
 
 // Combined context type that re-exports from all subcontexts
 interface AppContextType {
@@ -41,13 +44,19 @@ export const useAppContext = () => {
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <UserProvider>
-      <MatchProvider>
-        <ChatProvider>
-          <AppContextCombiner>
-            {children}
-          </AppContextCombiner>
-        </ChatProvider>
-      </MatchProvider>
+      <PreferencesProvider>
+        <NotificationProvider>
+          <MatchProvider>
+            <ChatProvider>
+              <OnboardingProvider>
+                <AppContextCombiner>
+                  {children}
+                </AppContextCombiner>
+              </OnboardingProvider>
+            </ChatProvider>
+          </MatchProvider>
+        </NotificationProvider>
+      </PreferencesProvider>
     </UserProvider>
   );
 };
