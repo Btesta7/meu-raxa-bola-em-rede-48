@@ -51,7 +51,17 @@ const CreateMatch = () => {
 
   const onSubmit = async (data: FormData) => {
     try {
-      await createMatch(data);
+      // Garantir que todos os campos obrigatórios estão presentes
+      const matchData: CreateMatchData = {
+        title: data.title,
+        date: data.date,
+        time: data.time,
+        location: data.location,
+        maxPlayers: data.maxPlayers,
+        description: data.description
+      };
+      
+      await createMatch(matchData);
       navigate('/admin/dashboard');
     } catch (error) {
       console.error('Erro ao criar partida:', error);

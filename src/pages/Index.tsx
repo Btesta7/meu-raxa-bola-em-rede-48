@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { useAppContext } from '@/contexts/AppContext';
@@ -7,7 +8,6 @@ import MatchCard from '@/components/MatchCard';
 import CreateMatchModal from '@/components/CreateMatchModal';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '@/contexts/UserContext';
-import DashboardGrid from '@/components/dashboard/DashboardGrid';
 
 const Index = () => {
   const { matches } = useAppContext();
@@ -38,8 +38,15 @@ const Index = () => {
     }
   }, [user, navigate]);
 
-  // Mostra o dashboard tradicional enquanto redireciona
-  return <DashboardGrid />;
+  // Mostra um loading simples enquanto redireciona
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Redirecionando...</p>
+      </div>
+    </div>
+  );
 };
 
 export default Index;
