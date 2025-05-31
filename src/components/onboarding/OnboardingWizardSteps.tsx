@@ -24,6 +24,7 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({
     name: initialData.name || '',
     age: initialData.age || null,
@@ -82,7 +83,7 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
       setDirection(1);
       setCurrentStep(prev => prev + 1);
     } else {
-      onComplete(onboardingData);
+      handleFinalComplete();
     }
   };
 
@@ -90,6 +91,17 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
     if (currentStep > 0) {
       setDirection(-1);
       setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const handleFinalComplete = async () => {
+    setIsSubmitting(true);
+    try {
+      await onComplete(onboardingData);
+    } catch (error) {
+      console.error('Erro ao completar onboarding:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -121,6 +133,30 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
   const currentStepData = steps[currentStep];
   const StepComponent = currentStepData.component;
 
+  // Render the current step with appropriate props
+  const renderCurrentStep = () => {
+    const baseProps = {
+      data: onboardingData,
+      onUpdate: updateStepData,
+      onNext: handleNext,
+      onPrevious: handlePrevious
+    };
+
+    // Special handling for the emergency contact step
+    if (currentStep === steps.length - 1) {
+      return (
+        <StepEmergencyContact
+          {...baseProps}
+          onComplete={handleFinalComplete}
+          isSubmitting={isSubmitting}
+        />
+      );
+    }
+
+    // For other steps, use the base props
+    return <StepComponent {...baseProps} />;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="container mx-auto px-4 py-8">
@@ -144,6 +180,7 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
                 variant="ghost"
                 onClick={onSkip}
                 className="text-muted-foreground hover:text-foreground"
+                disabled={isSubmitting}
               >
                 Pular configuração
               </Button>
@@ -163,7 +200,7 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
                   <motion.button
                     key={step.id}
                     onClick={() => handleStepClick(index)}
-                    disabled={index > currentStep}
+                    disabled={index > currentStep || isSubmitting}
                     className={`flex flex-col items-center space-y-2 p-2 rounded-lg transition-colors ${
                       index <= currentStep ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
                     }`}
@@ -230,51 +267,40 @@ const OnboardingWizardSteps: React.FC<OnboardingWizardStepsProps> = ({
                     }}
                     className="h-full"
                   >
-                    <StepComponent
-                      data={onboardingData}
-                      onUpdate={updateStepData}
-                      onNext={handleNext}
-                      onPrevious={handlePrevious}
-                    />
+                    {renderCurrentStep()}
                   </motion.div>
                 </AnimatePresence>
               </div>
 
-              {/* Navigation */}
-              <div className="flex justify-between items-center pt-6 mt-6 border-t">
-                <Button
-                  variant="outline"
-                  onClick={handlePrevious}
-                  disabled={currentStep === 0}
-                  className="flex items-center gap-2"
-                >
-                  <ArrowLeft className="w-4 h-4" />
-                  Anterior
-                </Button>
+              {/* Navigation - Only show for non-emergency contact steps */}
+              {currentStep !== steps.length - 1 && (
+                <div className="flex justify-between items-center pt-6 mt-6 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={handlePrevious}
+                    disabled={currentStep === 0 || isSubmitting}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    Anterior
+                  </Button>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>Pressione</span>
-                  <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">Enter</kbd>
-                  <span>para continuar</span>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Pressione</span>
+                    <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">Enter</kbd>
+                    <span>para continuar</span>
+                  </div>
+
+                  <Button
+                    onClick={handleNext}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                  >
+                    Próximo
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
                 </div>
-
-                <Button
-                  onClick={handleNext}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
-                >
-                  {currentStep === steps.length - 1 ? (
-                    <>
-                      Finalizar
-                      <CheckCircle className="w-4 h-4" />
-                    </>
-                  ) : (
-                    <>
-                      Próximo
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
+              )}
             </CardContent>
           </Card>
         </div>
