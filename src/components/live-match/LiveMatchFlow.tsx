@@ -135,6 +135,29 @@ export const LiveMatchFlow = () => {
     setPendingAssist({ goalEvent: null, isWaiting: false });
   };
 
+  const handleUndoEvent = (eventId: string) => {
+    if (!currentMatch) return;
+
+    const eventToUndo = currentMatch.events.find(e => e.id === eventId);
+    if (!eventToUndo || eventToUndo.type !== 'goal') return;
+
+    const newScore = { ...currentMatch.score };
+    if (eventToUndo.teamId === currentMatch.teamA.id) {
+      newScore.teamA = Math.max(0, newScore.teamA - 1);
+    } else {
+      newScore.teamB = Math.max(0, newScore.teamB - 1);
+    }
+
+    const updatedEvents = currentMatch.events.filter(e => e.id !== eventId);
+
+    setCurrentMatch({
+      ...currentMatch,
+      score: newScore,
+      events: updatedEvents,
+      winner: null // Reset winner when undoing goal
+    });
+  };
+
   const handleMatchEnd = () => {
     if (!currentMatch) return;
 
@@ -154,8 +177,53 @@ export const LiveMatchFlow = () => {
     setPhase('team-draw');
   };
 
+  const handleStartNextMatch = () => {
+    setPhase('match-selection');
+  };
+
+  const handleBackToSelection = () => {
+    setPhase('match-selection');
+  };
+
   const handleBackToHome = () => {
     navigate('/');
+  };
+
+  const handleTimerStart = () => {
+    if (!currentMatch) return;
+    setCurrentMatch({
+      ...currentMatch,
+      timer: { ...currentMatch.timer, isRunning: true, isPaused: false }
+    });
+  };
+
+  const handleTimerPause = () => {
+    if (!currentMatch) return;
+    setCurrentMatch({
+      ...currentMatch,
+      timer: { ...currentMatch.timer, isRunning: false, isPaused: true }
+    });
+  };
+
+  const handleTimerReset = () => {
+    if (!currentMatch) return;
+    setCurrentMatch({
+      ...currentMatch,
+      timer: { seconds: 420, isRunning: false, isPaused: false }
+    });
+  };
+
+  const handleTimerTick = () => {
+    if (!currentMatch) return;
+    const newSeconds = Math.max(0, currentMatch.timer.seconds - 1);
+    setCurrentMatch({
+      ...currentMatch,
+      timer: { ...currentMatch.timer, seconds: newSeconds }
+    });
+
+    if (newSeconds === 0 && !currentMatch.winner) {
+      setPhase('match-ended');
+    }
   };
 
   // Converter jogadores confirmados para o formato necessário
@@ -164,6 +232,20 @@ export const LiveMatchFlow = () => {
     name: player.name,
     skillLevel: 3 // Valor padrão, pode ser ajustado baseado nos stats do jogador
   }));
+
+  // Preparar próxima partida
+  const getNextMatch = () => {
+    if (teams.length < 3 || !currentMatch) return null;
+    
+    const otherTeams = teams.filter(t => t.id !== currentMatch.teamA.id && t.id !== currentMatch.teamB.id);
+    if (otherTeams.length === 0) return null;
+
+    return {
+      teamA: currentMatch.waitingTeam,
+      teamB: otherTeams[0],
+      waitingTeam: currentMatch.winner || currentMatch.teamA
+    };
+  };
 
   return (
     <div className="min-h-screen">
@@ -209,15 +291,13 @@ export const LiveMatchFlow = () => {
             />
 
             <MatchTimer
-              timer={currentMatch.timer}
-              onTimerUpdate={(newTimer) => {
-                if (currentMatch) {
-                  setCurrentMatch({ ...currentMatch, timer: newTimer });
-                  if (newTimer.seconds === 0 && !currentMatch.winner) {
-                    setPhase('match-ended');
-                  }
-                }
-              }}
+              seconds={currentMatch.timer.seconds}
+              isRunning={currentMatch.timer.isRunning}
+              isPaused={currentMatch.timer.isPaused}
+              onStart={handleTimerStart}
+              onPause={handleTimerPause}
+              onReset={handleTimerReset}
+              onTick={handleTimerTick}
             />
 
             <GoalTracker
@@ -231,20 +311,29 @@ export const LiveMatchFlow = () => {
               winner={currentMatch.winner}
             />
 
-            <EventHistory events={currentMatch.events} />
+            <EventHistory 
+              events={currentMatch.events}
+              onUndoEvent={handleUndoEvent}
+            />
           </div>
         </div>
       )}
 
       {phase === 'match-ended' && currentMatch && (
         <MatchEnd
-          teamA={currentMatch.teamA}
-          teamB={currentMatch.teamB}
-          finalScore={currentMatch.score}
-          winner={currentMatch.winner!}
-          events={currentMatch.events}
-          onNewMatch={() => setPhase('match-selection')}
-          onEndSession={handleBackToHome}
+          completedMatch={{
+            id: `match-${Date.now()}`,
+            teamA: currentMatch.teamA,
+            teamB: currentMatch.teamB,
+            finalScore: currentMatch.score,
+            winner: currentMatch.winner!,
+            events: currentMatch.events,
+            duration: 420 - currentMatch.timer.seconds,
+            timestamp: new Date()
+          }}
+          nextMatch={getNextMatch()}
+          onStartNextMatch={handleStartNextMatch}
+          onBackToSelection={handleBackToSelection}
         />
       )}
     </div>
