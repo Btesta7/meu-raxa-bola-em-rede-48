@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAdminContext } from '@/contexts/AdminContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Users, Calendar, Settings } from 'lucide-react';
+import { Plus, Users, Calendar, Settings, UserCheck, BarChart3 } from 'lucide-react';
+import Header from '@/components/Header';
 
 const AdminDashboard = () => {
   const { scheduledMatches } = useAdminContext();
@@ -27,8 +28,9 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -42,6 +44,49 @@ const AdminDashboard = () => {
             <Plus size={16} />
             Criar Nova Partida
           </Button>
+        </div>
+
+        {/* Ações Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/gerenciar-partidas')}>
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-center">
+                <Calendar size={32} className="mx-auto mb-2 text-blue-600" />
+                <h3 className="font-semibold">Gerenciar Partidas</h3>
+                <p className="text-sm text-gray-600">Ver todas as partidas</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/gerenciar-jogadores')}>
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-center">
+                <Users size={32} className="mx-auto mb-2 text-green-600" />
+                <h3 className="font-semibold">Gerenciar Jogadores</h3>
+                <p className="text-sm text-gray-600">Administrar usuários</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/admin/criar-partida')}>
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-center">
+                <Plus size={32} className="mx-auto mb-2 text-purple-600" />
+                <h3 className="font-semibold">Nova Partida</h3>
+                <p className="text-sm text-gray-600">Criar partida</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => navigate('/stats')}>
+            <CardContent className="flex items-center justify-center p-6">
+              <div className="text-center">
+                <BarChart3 size={32} className="mx-auto mb-2 text-orange-600" />
+                <h3 className="font-semibold">Estatísticas</h3>
+                <p className="text-sm text-gray-600">Ver dados gerais</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Estatísticas */}
@@ -69,7 +114,7 @@ const AdminDashboard = () => {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Confirmações</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{totalConfirmed}</div>
@@ -87,15 +132,25 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        {/* Lista de Partidas */}
+        {/* Partidas Recentes */}
         <Card>
           <CardHeader>
-            <CardTitle>📋 Partidas Agendadas</CardTitle>
-            <CardDescription>Gerencie todas as partidas criadas</CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle>📋 Partidas Recentes</CardTitle>
+                <CardDescription>Últimas partidas criadas</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/admin/gerenciar-partidas')}
+              >
+                Ver Todas
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {scheduledMatches.length === 0 ? (
+              {scheduledMatches.slice(0, 3).length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <Calendar size={48} className="mx-auto mb-4 opacity-50" />
                   <p>Nenhuma partida agendada</p>
@@ -108,7 +163,7 @@ const AdminDashboard = () => {
                   </Button>
                 </div>
               ) : (
-                scheduledMatches.map((match) => (
+                scheduledMatches.slice(0, 3).map((match) => (
                   <div key={match.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
@@ -130,9 +185,9 @@ const AdminDashboard = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/admin/gerenciar-partida/${match.id}`)}
+                        onClick={() => navigate(`/admin/editar-partida/${match.id}`)}
                       >
-                        Gerenciar
+                        Editar
                       </Button>
                       {match.confirmedPlayers.length >= 10 && (
                         <Button 
@@ -149,7 +204,7 @@ const AdminDashboard = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </main>
     </div>
   );
 };

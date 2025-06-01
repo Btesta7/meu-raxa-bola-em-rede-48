@@ -20,6 +20,9 @@ import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import CreateMatch from "./pages/CreateMatch";
 import ScheduledMatches from "./pages/ScheduledMatches";
+import AdminPlayerManagement from "./pages/AdminPlayerManagement";
+import AdminMatchManagement from "./pages/AdminMatchManagement";
+import EditMatch from "./pages/EditMatch";
 import { LiveMatchFlow } from "./components/live-match/LiveMatchFlow";
 import { AppProvider } from "./contexts/AppContext";
 import { AdminProvider } from "./contexts/AdminContext";
@@ -99,6 +102,21 @@ const App = () => (
                   <Route path="/admin/criar-partida" element={
                     <AdminRoute>
                       <CreateMatch />
+                    </AdminRoute>
+                  } />
+                  <Route path="/admin/gerenciar-jogadores" element={
+                    <AdminRoute>
+                      <AdminPlayerManagement />
+                    </AdminRoute>
+                  } />
+                  <Route path="/admin/gerenciar-partidas" element={
+                    <AdminRoute>
+                      <AdminMatchManagement />
+                    </AdminRoute>
+                  } />
+                  <Route path="/admin/editar-partida/:matchId" element={
+                    <AdminRoute>
+                      <EditMatch />
                     </AdminRoute>
                   } />
                   <Route path="*" element={<NotFound />} />

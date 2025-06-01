@@ -7,7 +7,7 @@ import { useUserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
 import Header from '@/components/Header';
-import { Calendar, Plus } from 'lucide-react';
+import { Calendar, Plus, Settings } from 'lucide-react';
 
 const ScheduledMatches = () => {
   const { scheduledMatches, isAdmin } = useAdminContext();
@@ -33,13 +33,23 @@ const ScheduledMatches = () => {
             </p>
           </div>
           {isAdmin && (
-            <Button 
-              onClick={() => navigate('/admin/dashboard')}
-              className="flex items-center gap-2"
-            >
-              <Plus size={16} />
-              Painel Admin
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/admin/gerenciar-partidas')}
+                className="flex items-center gap-2"
+              >
+                <Settings size={16} />
+                Gerenciar
+              </Button>
+              <Button 
+                onClick={() => navigate('/admin/dashboard')}
+                className="flex items-center gap-2"
+              >
+                <Plus size={16} />
+                Painel Admin
+              </Button>
+            </div>
           )}
         </div>
 
@@ -68,6 +78,43 @@ const ScheduledMatches = () => {
                     {upcomingMatches.length}
                   </div>
                   <div className="text-sm text-gray-600">Disponíveis</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Estatísticas para Admin */}
+        {isAdmin && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Visão Geral</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">
+                    {upcomingMatches.length}
+                  </div>
+                  <div className="text-sm text-gray-600">Partidas Ativas</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {scheduledMatches.reduce((acc, match) => acc + match.confirmedPlayers.length, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Total Confirmações</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-yellow-600">
+                    {scheduledMatches.reduce((acc, match) => acc + match.waitingList.length, 0)}
+                  </div>
+                  <div className="text-sm text-gray-600">Lista de Espera</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">
+                    {scheduledMatches.filter(m => m.confirmedPlayers.length >= 10).length}
+                  </div>
+                  <div className="text-sm text-gray-600">Prontas para Iniciar</div>
                 </div>
               </div>
             </CardContent>
