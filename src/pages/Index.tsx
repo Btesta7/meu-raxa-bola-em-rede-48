@@ -58,7 +58,7 @@ const Index = () => {
           </div>
 
           <div 
-            onClick={() => navigate('/live-match')}
+            onClick={() => navigate('/partidas')}
             className="bg-gradient-to-r from-red-500 to-red-600 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer text-white"
           >
             <div className="text-center">

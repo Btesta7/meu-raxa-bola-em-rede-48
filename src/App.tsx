@@ -15,7 +15,6 @@ import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
 import MatchDetails from "./pages/MatchDetails";
-import LiveMatch from "./pages/LiveMatch";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/AdminDashboard";
 import CreateMatch from "./pages/CreateMatch";
@@ -48,7 +47,6 @@ const App = () => (
                   <Route path="/register" element={<Register />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/live-match" element={<LiveMatch />} />
                   <Route path="/live-match/:matchId" element={
                     <ProtectedRoute>
                       <LiveMatchFlow />
