@@ -1,21 +1,31 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAdminContext } from '@/contexts/AdminContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
 import Header from '@/components/Header';
-import { Calendar, Plus, Settings } from 'lucide-react';
+import { Calendar, Plus, Settings, Play, Radio } from 'lucide-react';
 
 const ScheduledMatches = () => {
   const { scheduledMatches, isAdmin } = useAdminContext();
   const { user } = useUserContext();
   const navigate = useNavigate();
+  const [selectedMatchForLive, setSelectedMatchForLive] = useState<string>('');
 
   const activeMatches = scheduledMatches.filter(m => m.status === 'active');
   const upcomingMatches = activeMatches.filter(m => new Date(m.date) >= new Date());
+  
+  // Partidas elegíveis para modo ao vivo (com pelo menos 15 jogadores confirmados)
+  const liveEligibleMatches = upcomingMatches.filter(m => m.confirmedPlayers.length >= 15);
+
+  const handleStartLiveMatch = () => {
+    if (selectedMatchForLive) {
+      navigate(`/live-match/${selectedMatchForLive}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,26 +42,94 @@ const ScheduledMatches = () => {
               }
             </p>
           </div>
-          {isAdmin && (
-            <div className="flex gap-2">
-              <Button 
-                variant="outline"
-                onClick={() => navigate('/admin/gerenciar-partidas')}
-                className="flex items-center gap-2"
-              >
-                <Settings size={16} />
-                Gerenciar
-              </Button>
-              <Button 
-                onClick={() => navigate('/admin/dashboard')}
-                className="flex items-center gap-2"
-              >
-                <Plus size={16} />
-                Painel Admin
-              </Button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            {/* Botão Partidas ao Vivo - visível para todos */}
+            <Button 
+              variant="outline"
+              onClick={() => navigate('/live-match')}
+              className="flex items-center gap-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+            >
+              <Radio size={16} />
+              Partidas ao Vivo
+            </Button>
+            
+            {isAdmin && (
+              <>
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/admin/gerenciar-partidas')}
+                  className="flex items-center gap-2"
+                >
+                  <Settings size={16} />
+                  Gerenciar
+                </Button>
+                <Button 
+                  onClick={() => navigate('/admin/dashboard')}
+                  className="flex items-center gap-2"
+                >
+                  <Plus size={16} />
+                  Painel Admin
+                </Button>
+              </>
+            )}
+          </div>
         </div>
+
+        {/* Controle de Partidas ao Vivo - Apenas para Admin */}
+        {isAdmin && (
+          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Play className="text-green-600" size={20} />
+                Iniciar Partida ao Vivo
+              </CardTitle>
+              <CardDescription>
+                Selecione uma partida agendada com pelo menos 15 jogadores confirmados para iniciar o modo ao vivo
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {liveEligibleMatches.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-2">
+                    Nenhuma partida elegível para modo ao vivo
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    É necessário ter pelo menos 15 jogadores confirmados
+                  </p>
+                </div>
+              ) : (
+                <div className="flex gap-4 items-end">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Escolher Partida
+                    </label>
+                    <Select value={selectedMatchForLive} onValueChange={setSelectedMatchForLive}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma partida agendada..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {liveEligibleMatches.map((match) => (
+                          <SelectItem key={match.id} value={match.id}>
+                            {match.title} - {new Date(match.date).toLocaleDateString('pt-BR')} às {match.time} 
+                            ({match.confirmedPlayers.length} jogadores)
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button 
+                    onClick={handleStartLiveMatch}
+                    disabled={!selectedMatchForLive}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Play size={16} className="mr-2" />
+                    Iniciar Partida ao Vivo
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Estatísticas Rápidas para o Jogador */}
         {!isAdmin && user && (
