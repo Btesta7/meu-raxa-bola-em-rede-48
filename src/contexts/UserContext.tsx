@@ -54,18 +54,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        // Carregar usuários mock (incluindo admins)
-        const updatedMockUsers = mockUsers.map(user => ({
-          ...user,
-          isAdmin: user.id === '1' || user.id === '2' // Fazer os primeiros dois usuários admins
-        }));
-        setUsers(updatedMockUsers);
+        // Carregar usuários mock - apenas o primeiro usuário (Carlos Silva) é admin
+        setUsers(mockUsers);
         
         // Verificar se há sessão armazenada
         const storedUser = getStoredSession();
         if (storedUser) {
           // Verificar se o usuário ainda existe na base de dados
-          const userExists = updatedMockUsers.find(u => u.id === storedUser.id && u.email === storedUser.email);
+          const userExists = mockUsers.find(u => u.id === storedUser.id && u.email === storedUser.email);
           if (userExists) {
             setAuthState({
               isAuthenticated: true,

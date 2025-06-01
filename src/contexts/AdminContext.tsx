@@ -21,19 +21,29 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const isAdmin = user?.isAdmin === true;
 
-  // Mock data inicial
+  // Mock data inicial com datas futuras
   useEffect(() => {
+    const today = new Date();
+    const nextSunday = new Date(today);
+    nextSunday.setDate(today.getDate() + (7 - today.getDay()));
+    
+    const nextWednesday = new Date(today);
+    nextWednesday.setDate(today.getDate() + ((3 - today.getDay() + 7) % 7));
+    if (nextWednesday <= today) {
+      nextWednesday.setDate(nextWednesday.getDate() + 7);
+    }
+
     const mockMatches: MatchSchedule[] = [
       {
         id: 'match-001',
         title: 'Pelada Domingo',
-        date: '2024-12-08',
+        date: nextSunday.toISOString().split('T')[0],
         time: '15:00',
         location: 'Quadra Central',
         maxPlayers: 20,
         description: 'Partida tradicional de domingo',
         status: 'active',
-        createdBy: 'admin-1',
+        createdBy: '1', // Carlos Silva (admin)
         createdAt: new Date('2024-12-01'),
         confirmedPlayers: ['1', '2', '3'],
         waitingList: []
@@ -41,13 +51,13 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       {
         id: 'match-002',
         title: 'Pelada Quarta',
-        date: '2024-12-11',
+        date: nextWednesday.toISOString().split('T')[0],
         time: '19:00',
         location: 'Campo Sintético',
         maxPlayers: 16,
         description: 'Partida noturna',
         status: 'active',
-        createdBy: 'admin-1',
+        createdBy: '1', // Carlos Silva (admin)
         createdAt: new Date('2024-12-01'),
         confirmedPlayers: ['1', '4', '5', '6'],
         waitingList: []
