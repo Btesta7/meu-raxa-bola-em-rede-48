@@ -119,7 +119,7 @@ const Index = () => {
         )}
 
         <CreateMatchModal 
-          isOpen={isCreateModalOpen} 
+          open={isCreateModalOpen} 
           onClose={() => setIsCreateModalOpen(false)} 
         />
       </main>
