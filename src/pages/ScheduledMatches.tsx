@@ -6,6 +6,7 @@ import { useAdminContext } from '@/contexts/AdminContext';
 import { useUserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
+import Header from '@/components/Header';
 import { Calendar, Plus } from 'lucide-react';
 
 const ScheduledMatches = () => {
@@ -17,8 +18,9 @@ const ScheduledMatches = () => {
   const upcomingMatches = activeMatches.filter(m => new Date(m.date) >= new Date());
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="container mx-auto px-4 py-6 space-y-6">
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
@@ -117,7 +119,7 @@ const ScheduledMatches = () => {
             </CardContent>
           </Card>
         )}
-      </div>
+      </main>
     </div>
   );
 };
