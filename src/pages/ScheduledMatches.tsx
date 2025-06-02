@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,13 +19,20 @@ const ScheduledMatches = () => {
   const activeMatches = scheduledMatches.filter(m => m.status === 'active');
   const upcomingMatches = activeMatches.filter(m => new Date(m.date) >= new Date());
   
-  // Partidas elegíveis para modo ao vivo (com pelo menos 15 jogadores confirmados)
-  const liveEligibleMatches = upcomingMatches.filter(m => m.confirmedPlayers.length >= 15);
+  // Partidas elegíveis para modo ao vivo (com pelo menos 6 jogadores confirmados)
+  const liveEligibleMatches = upcomingMatches.filter(m => m.confirmedPlayers.length >= 6);
 
   const handleStartLiveMatch = () => {
     if (selectedMatchForLive) {
       navigate(`/live-match/${selectedMatchForLive}`);
     }
+  };
+
+  const getMatchStatusMessage = (confirmedCount: number): string => {
+    if (confirmedCount < 6) {
+      return `Aguardando jogadores (${confirmedCount}/6 mínimo para 2 times)`;
+    }
+    return `Pronto para iniciar (${confirmedCount} jogadores confirmados)`;
   };
 
   return (
@@ -74,7 +82,7 @@ const ScheduledMatches = () => {
                 Iniciar Partida ao Vivo
               </CardTitle>
               <CardDescription>
-                Selecione uma partida agendada com pelo menos 15 jogadores confirmados para iniciar o modo ao vivo
+                Selecione uma partida agendada com jogadores confirmados para iniciar o modo ao vivo
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -84,7 +92,7 @@ const ScheduledMatches = () => {
                     Nenhuma partida elegível para modo ao vivo
                   </p>
                   <p className="text-sm text-gray-500">
-                    É necessário ter pelo menos 15 jogadores confirmados
+                    É necessário ter pelo menos 6 jogadores confirmados para formar 2 times
                   </p>
                 </div>
               ) : (
@@ -180,7 +188,7 @@ const ScheduledMatches = () => {
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-purple-600">
-                    {scheduledMatches.filter(m => m.confirmedPlayers.length >= 10).length}
+                    {scheduledMatches.filter(m => m.confirmedPlayers.length >= 6).length}
                   </div>
                   <div className="text-sm text-gray-600">Prontas para Iniciar</div>
                 </div>
@@ -229,7 +237,7 @@ const ScheduledMatches = () => {
                 <li>• As partidas são agendadas pelos administradores</li>
                 <li>• Confirme sua presença clicando no botão "Confirmar Presença"</li>
                 <li>• Se a partida estiver lotada, você entrará na lista de espera</li>
-                <li>• Partidas ao vivo começam quando há pelo menos 10 jogadores confirmados</li>
+                <li>• Partidas ao vivo começam quando há pelo menos 6 jogadores confirmados (2 times de 3)</li>
               </ul>
             </CardContent>
           </Card>

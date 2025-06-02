@@ -115,19 +115,43 @@ export const DEMO_PLAYERS: Player[] = [
 export function balancedTeamSort(players: Player[]): Team[] {
   const sortedPlayers = [...players].sort((a, b) => (b.skillLevel || 3) - (a.skillLevel || 3));
   
+  // Adaptar número de times baseado na quantidade de jogadores
+  let teamCount = 2; // Padrão: 2 times
+  if (players.length >= 9) {
+    teamCount = 3; // 3 times se tiver 9+ jogadores
+  }
+  
+  console.log(`[DEBUG] Criando ${teamCount} times para ${players.length} jogadores`);
+  
   const teams: Team[] = [
     { ...TEAMS_CONFIG.barcelona, players: [] },
-    { ...TEAMS_CONFIG.realMadrid, players: [] },
-    { ...TEAMS_CONFIG.manchesterCity, players: [] }
+    { ...TEAMS_CONFIG.realMadrid, players: [] }
   ];
+  
+  if (teamCount === 3) {
+    teams.push({ ...TEAMS_CONFIG.manchesterCity, players: [] });
+  }
   
   // Distribuição serpentina para balanceamento
   for (let i = 0; i < sortedPlayers.length; i++) {
-    const teamIndex = Math.floor(i / 5) % 2 === 0 
-      ? i % 3 
-      : 2 - (i % 3);
+    const teamIndex = Math.floor(i / teamCount) % 2 === 0 
+      ? i % teamCount 
+      : (teamCount - 1) - (i % teamCount);
     teams[teamIndex].players.push(sortedPlayers[i]);
   }
   
-  return teams;
+  return teams.filter(team => team.players.length > 0);
+}
+
+// Função auxiliar para validar se uma partida pode iniciar
+export function canStartMatch(confirmedPlayers: Player[]): boolean {
+  return confirmedPlayers.length >= 6; // Mínimo para 2 times de 3
+}
+
+// Função auxiliar para obter status da partida
+export function getMatchStatus(confirmedPlayers: Player[]): string {
+  if (confirmedPlayers.length < 6) {
+    return `Aguardando jogadores (${confirmedPlayers.length}/6 mínimo)`;
+  }
+  return `Pronto para iniciar (${confirmedPlayers.length} jogadores)`;
 }

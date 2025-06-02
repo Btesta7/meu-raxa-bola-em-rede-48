@@ -27,6 +27,8 @@ export const MatchSelection = ({ teams, onMatchStart }: MatchSelectionProps) => 
     }
   };
 
+  const totalPlayers = teams.reduce((acc, team) => acc + team.players.length, 0);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-green-900 p-4">
       <div className="max-w-4xl mx-auto space-y-8 pt-8">
@@ -38,7 +40,7 @@ export const MatchSelection = ({ teams, onMatchStart }: MatchSelectionProps) => 
               🎮 SELECIONAR PARTIDA
             </CardTitle>
             <p className="text-xl text-blue-300 mt-2">
-              Escolha os times para jogar
+              Escolha os times para jogar ({totalPlayers} jogadores confirmados)
             </p>
           </CardHeader>
         </Card>
