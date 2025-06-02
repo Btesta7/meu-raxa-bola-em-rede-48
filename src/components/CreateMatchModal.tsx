@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Match } from '@/types';
-import { useAppContext } from '@/contexts/AppContext';
+import { CreateMatchData } from '@/types/admin';
+import { useMatchContext } from '@/contexts/MatchContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ interface CreateMatchModalProps {
 }
 
 type FormData = {
+  title: string;
   date: string;
   time: string;
   location: string;
@@ -22,9 +23,10 @@ type FormData = {
 };
 
 const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ open, onClose }) => {
-  const { createMatch } = useAppContext();
+  const { createMatch } = useMatchContext();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     defaultValues: {
+      title: '',
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '19:00',
       location: '',
@@ -32,16 +34,16 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ open, onClose }) =>
     }
   });
 
-  const onSubmit = (data: FormData) => {
-    const newMatch: Omit<Match, 'id' | 'confirmedPlayers'> = {
+  const onSubmit = async (data: FormData) => {
+    const matchData: CreateMatchData = {
+      title: data.title,
       date: data.date,
       time: data.time,
       location: data.location,
-      maxPlayers: data.maxPlayers,
-      status: 'scheduled'
+      maxPlayers: data.maxPlayers
     };
     
-    createMatch(newMatch);
+    await createMatch(matchData);
     reset();
     onClose();
   };
@@ -54,6 +56,17 @@ const CreateMatchModal: React.FC<CreateMatchModalProps> = ({ open, onClose }) =>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Título</Label>
+            <Input 
+              id="title" 
+              type="text" 
+              placeholder="Ex: Pelada Domingo"
+              {...register('title', { required: 'Título é obrigatório' })} 
+            />
+            {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="date">Data</Label>
             <Input 
