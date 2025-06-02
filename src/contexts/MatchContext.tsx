@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, ReactNode } from 'react';
 import { Match, User } from '../types';
 import { toast } from '@/components/ui/sonner';
@@ -25,8 +26,21 @@ export const useMatchContext = () => {
 };
 
 export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  console.log('MatchProvider rendering...');
+  
   const { user, users, updateUserStats } = useUserContext();
-  const { scheduledMatches, confirmPlayerAttendance, cancelPlayerAttendance, createMatch: adminCreateMatch, updateMatch } = useAdminContext();
+  
+  // Add error boundary around useAdminContext
+  let adminContext;
+  try {
+    adminContext = useAdminContext();
+    console.log('AdminContext successfully accessed in MatchProvider');
+  } catch (error) {
+    console.error('Error accessing AdminContext in MatchProvider:', error);
+    throw error;
+  }
+  
+  const { scheduledMatches, confirmPlayerAttendance, cancelPlayerAttendance, createMatch: adminCreateMatch, updateMatch } = adminContext;
   
   // Convert scheduledMatches to Match format with proper type mapping
   const matches: Match[] = scheduledMatches.map(match => ({
@@ -160,5 +174,6 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     recordMatchResult
   };
 
+  console.log('MatchProvider rendering with value:', value);
   return <MatchContext.Provider value={value}>{children}</MatchContext.Provider>;
 };
