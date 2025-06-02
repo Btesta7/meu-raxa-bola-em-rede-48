@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { MatchSchedule, CreateMatchData, PlayerConfirmation, AdminContextType } from '@/types/admin';
 import { useUserContext } from './UserContext';
@@ -21,7 +20,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const isAdmin = user?.isAdmin === true;
 
-  // Mock data inicial com datas futuras
+  // Mock data inicial com datas futuras e mais jogadores
   useEffect(() => {
     const today = new Date();
     const nextSunday = new Date(today);
@@ -32,6 +31,9 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (nextWednesday <= today) {
       nextWednesday.setDate(nextWednesday.getDate() + 7);
     }
+
+    // Criar lista com mais jogadores para testes (pelos menos 15)
+    const mockPlayerIds = users.slice(0, 18).map(u => u.id);
 
     const mockMatches: MatchSchedule[] = [
       {
@@ -45,7 +47,7 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         status: 'active',
         createdBy: '1', // Carlos Silva (admin)
         createdAt: new Date('2024-12-01'),
-        confirmedPlayers: ['1', '2', '3'],
+        confirmedPlayers: mockPlayerIds.slice(0, 16), // 16 jogadores confirmados
         waitingList: []
       },
       {
@@ -59,12 +61,12 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         status: 'active',
         createdBy: '1', // Carlos Silva (admin)
         createdAt: new Date('2024-12-01'),
-        confirmedPlayers: ['1', '4', '5', '6'],
+        confirmedPlayers: mockPlayerIds.slice(0, 15), // 15 jogadores confirmados (mínimo)
         waitingList: []
       }
     ];
     setScheduledMatches(mockMatches);
-  }, []);
+  }, [users]);
 
   const createMatch = async (matchData: CreateMatchData): Promise<void> => {
     if (!isAdmin) {

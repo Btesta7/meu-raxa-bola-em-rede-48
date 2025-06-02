@@ -7,7 +7,7 @@ import { useUserContext } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
 import Header from '@/components/Header';
-import { Calendar, Plus, Settings, Play, Radio } from 'lucide-react';
+import { Calendar, Plus, Settings, Play } from 'lucide-react';
 
 const ScheduledMatches = () => {
   const { scheduledMatches, isAdmin } = useAdminContext();
@@ -43,16 +43,6 @@ const ScheduledMatches = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            {/* Botão Partidas ao Vivo - visível para todos */}
-            <Button 
-              variant="outline"
-              onClick={() => navigate('/live-match')}
-              className="flex items-center gap-2 bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
-            >
-              <Radio size={16} />
-              Partidas ao Vivo
-            </Button>
-            
             {isAdmin && (
               <>
                 <Button 
