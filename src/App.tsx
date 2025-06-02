@@ -24,9 +24,6 @@ import AdminMatchManagement from "./pages/AdminMatchManagement";
 import EditMatch from "./pages/EditMatch";
 import { LiveMatchFlow } from "./components/live-match/LiveMatchFlow";
 import { AppProvider } from "./contexts/AppContext";
-import { AdminProvider } from "./contexts/AdminContext";
-import { MatchProvider } from "./contexts/MatchContext";
-import { NotificationProvider } from "./contexts/NotificationContext";
 import { AuditProvider } from "./contexts/AuditContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -40,95 +37,89 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AppProvider>
-          <AdminProvider>
-            <MatchProvider>
-              <NotificationProvider>
-                <AuditProvider>
-                  <Toaster />
-                  <Sonner />
-                  <BrowserRouter>
-                    <Routes>
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/forgot-password" element={<ForgotPassword />} />
-                      <Route path="/reset-password" element={<ResetPassword />} />
-                      <Route path="/live-match/:matchId" element={
-                        <ProtectedRoute>
-                          <LiveMatchFlow />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/onboarding" element={
-                        <ProtectedRoute>
-                          <Onboarding />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/" element={
-                        <ProtectedRoute>
-                          <Index />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/partidas" element={
-                        <ProtectedRoute>
-                          <ScheduledMatches />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/players" element={
-                        <ProtectedRoute>
-                          <Players />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/stats" element={
-                        <ProtectedRoute>
-                          <Stats />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/chat" element={
-                        <ProtectedRoute>
-                          <Chat />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/profile" element={
-                        <ProtectedRoute>
-                          <Profile />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/match/:matchId" element={
-                        <ProtectedRoute>
-                          <MatchDetails />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/admin/dashboard" element={
-                        <AdminRoute>
-                          <AdminDashboard />
-                        </AdminRoute>
-                      } />
-                      <Route path="/admin/criar-partida" element={
-                        <AdminRoute>
-                          <CreateMatch />
-                        </AdminRoute>
-                      } />
-                      <Route path="/admin/gerenciar-jogadores" element={
-                        <AdminRoute>
-                          <AdminPlayerManagement />
-                        </AdminRoute>
-                      } />
-                      <Route path="/admin/gerenciar-partidas" element={
-                        <AdminRoute>
-                          <AdminMatchManagement />
-                        </AdminRoute>
-                      } />
-                      <Route path="/admin/editar-partida/:matchId" element={
-                        <AdminRoute>
-                          <EditMatch />
-                        </AdminRoute>
-                      } />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </BrowserRouter>
-                </AuditProvider>
-              </NotificationProvider>
-            </MatchProvider>
-          </AdminProvider>
+          <AuditProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/live-match/:matchId" element={
+                  <ProtectedRoute>
+                    <LiveMatchFlow />
+                  </ProtectedRoute>
+                } />
+                <Route path="/onboarding" element={
+                  <ProtectedRoute>
+                    <Onboarding />
+                  </ProtectedRoute>
+                } />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Index />
+                  </ProtectedRoute>
+                } />
+                <Route path="/partidas" element={
+                  <ProtectedRoute>
+                    <ScheduledMatches />
+                  </ProtectedRoute>
+                } />
+                <Route path="/players" element={
+                  <ProtectedRoute>
+                    <Players />
+                  </ProtectedRoute>
+                } />
+                <Route path="/stats" element={
+                  <ProtectedRoute>
+                    <Stats />
+                  </ProtectedRoute>
+                } />
+                <Route path="/chat" element={
+                  <ProtectedRoute>
+                    <Chat />
+                  </ProtectedRoute>
+                } />
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="/match/:matchId" element={
+                  <ProtectedRoute>
+                    <MatchDetails />
+                  </ProtectedRoute>
+                } />
+                <Route path="/admin/dashboard" element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/criar-partida" element={
+                  <AdminRoute>
+                    <CreateMatch />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/gerenciar-jogadores" element={
+                  <AdminRoute>
+                    <AdminPlayerManagement />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/gerenciar-partidas" element={
+                  <AdminRoute>
+                    <AdminMatchManagement />
+                  </AdminRoute>
+                } />
+                <Route path="/admin/editar-partida/:matchId" element={
+                  <AdminRoute>
+                    <EditMatch />
+                  </AdminRoute>
+                } />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </AuditProvider>
         </AppProvider>
       </TooltipProvider>
     </QueryClientProvider>

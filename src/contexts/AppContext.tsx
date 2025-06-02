@@ -5,6 +5,7 @@ import { MatchProvider, useMatchContext } from './MatchContext';
 import { ChatProvider, useChatContext } from './ChatContext';
 import { PreferencesProvider } from './PreferencesContext';
 import { NotificationProvider } from './NotificationContext';
+import { AdminProvider } from './AdminContext';
 import { OnboardingProvider } from '@/components/onboarding/OnboardingProvider';
 
 // Combined context type that re-exports from all subcontexts
@@ -46,15 +47,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     <UserProvider>
       <PreferencesProvider>
         <NotificationProvider>
-          <MatchProvider>
-            <ChatProvider>
-              <OnboardingProvider>
-                <AppContextCombiner>
-                  {children}
-                </AppContextCombiner>
-              </OnboardingProvider>
-            </ChatProvider>
-          </MatchProvider>
+          <AdminProvider>
+            <MatchProvider>
+              <ChatProvider>
+                <OnboardingProvider>
+                  <AppContextCombiner>
+                    {children}
+                  </AppContextCombiner>
+                </OnboardingProvider>
+              </ChatProvider>
+            </MatchProvider>
+          </AdminProvider>
         </NotificationProvider>
       </PreferencesProvider>
     </UserProvider>
