@@ -23,7 +23,7 @@ const INITIAL_STATE: MatchState = {
   }
 };
 
-const STORAGE_KEY = 'nosso-raxa-complete-session';
+const STORAGE_KEY = 'nosso-racha-complete-session';
 
 export default function LiveMatch() {
   const { user } = useUserContext();
