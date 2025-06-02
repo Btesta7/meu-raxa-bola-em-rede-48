@@ -1,19 +1,21 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
 import { useNavigate } from 'react-router-dom';
-import { useMatchContext } from '@/contexts/MatchContext'; // Usar MatchContext unificado
+import { useMatchContext } from '@/contexts/MatchContext';
 import { useUserContext } from '@/contexts/UserContext';
+import { useAdminContext } from '@/contexts/AdminContext';
 
 const Index = () => {
-  const { matches } = useMatchContext(); // Usar matches do MatchContext unificado
+  const { matches } = useMatchContext();
   const { user } = useUserContext();
+  const { scheduledMatches } = useAdminContext();
   const navigate = useNavigate();
 
-  // Filtrar apenas partidas ativas e futuras
-  const activeMatches = matches.filter(m => m.status === 'active');
-  const upcomingMatches = activeMatches.filter(m => new Date(m.date) >= new Date());
+  // Filter matches by status
+  const upcomingMatches = matches.filter(m => m.status === 'scheduled' && new Date(m.date) >= new Date());
   const pastMatches = matches.filter(m => m.status === 'completed');
 
   return (
@@ -79,21 +81,13 @@ const Index = () => {
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-green-600">
-                  {matches.filter(m => 
-                    Array.isArray(m.confirmedPlayers) && 
-                    m.confirmedPlayers.some(p => 
-                      typeof p === 'string' ? p === user.id : p.id === user.id
-                    )
-                  ).length}
+                  {scheduledMatches.filter(m => m.confirmedPlayers.includes(user.id)).length}
                 </div>
                 <div className="text-sm text-gray-600">Confirmadas</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {matches.filter(m => 
-                    Array.isArray(m.waitingList) && 
-                    m.waitingList.includes(user.id)
-                  ).length}
+                  {scheduledMatches.filter(m => m.waitingList.includes(user.id)).length}
                 </div>
                 <div className="text-sm text-gray-600">Lista de Espera</div>
               </div>
@@ -117,9 +111,11 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingMatches.slice(0, 3).map((match) => (
-                <ScheduledMatchCard key={match.id} match={match} />
-              ))}
+              {upcomingMatches.slice(0, 3).map((match) => {
+                // Convert Match back to MatchSchedule for the card component
+                const scheduleMatch = scheduledMatches.find(sm => sm.id === match.id);
+                return scheduleMatch ? <ScheduledMatchCard key={match.id} match={scheduleMatch} /> : null;
+              })}
             </div>
           </section>
         )}
@@ -134,21 +130,24 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pastMatches.slice(0, 3).map((match) => (
-                <div key={match.id} className="bg-white rounded-lg shadow-md p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold">{match.title}</h3>
-                    <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                      Finalizada
-                    </span>
+              {pastMatches.slice(0, 3).map((match) => {
+                const scheduleMatch = scheduledMatches.find(sm => sm.id === match.id);
+                return (
+                  <div key={match.id} className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-semibold">{scheduleMatch?.title || 'Partida'}</h3>
+                      <span className="text-sm bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        Finalizada
+                      </span>
+                    </div>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>📅 {new Date(match.date).toLocaleDateString('pt-BR')}</p>
+                      <p>📍 {match.location}</p>
+                      <p>👥 {match.confirmedPlayers.length} jogadores</p>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>📅 {new Date(match.date).toLocaleDateString('pt-BR')}</p>
-                    <p>📍 {match.location}</p>
-                    <p>👥 {Array.isArray(match.confirmedPlayers) ? match.confirmedPlayers.length : 0} jogadores</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}

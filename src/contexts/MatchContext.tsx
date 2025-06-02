@@ -3,9 +3,11 @@ import { Match, User } from '../types';
 import { toast } from '@/components/ui/sonner';
 import { useUserContext } from './UserContext';
 import { useAdminContext } from './AdminContext';
+import { CreateMatchData } from '@/types/admin';
 
 interface MatchContextType {
   matches: Match[];
+  createMatch: (matchData: CreateMatchData) => Promise<void>;
   confirmPresence: (matchId: string) => void;
   cancelPresence: (matchId: string) => void;
   sortTeams: (matchId: string) => void;
@@ -24,26 +26,29 @@ export const useMatchContext = () => {
 
 export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, users, updateUserStats } = useUserContext();
-  // Usar scheduledMatches do AdminContext como fonte única de dados
-  const { scheduledMatches, confirmPlayerAttendance, cancelPlayerAttendance } = useAdminContext();
+  const { scheduledMatches, confirmPlayerAttendance, cancelPlayerAttendance, createMatch: adminCreateMatch, updateMatch } = useAdminContext();
   
-  // Converter scheduledMatches para o formato Match se necessário
+  // Convert scheduledMatches to Match format with proper type mapping
   const matches: Match[] = scheduledMatches.map(match => ({
     id: match.id,
-    title: match.title,
     date: match.date,
     time: match.time,
     location: match.location,
     maxPlayers: match.maxPlayers,
-    status: match.status,
-    // Converter IDs de jogadores para objetos User completos
+    // Map admin status to match status
+    status: match.status === 'active' ? 'scheduled' : 
+            match.status === 'completed' ? 'completed' : 
+            match.status === 'cancelled' ? 'canceled' : 'scheduled',
     confirmedPlayers: match.confirmedPlayers.map(playerId => 
       users.find(u => u.id === playerId) || { id: playerId } as User
     ),
-    // Adicionar outras propriedades necessárias
-    description: match.description || '',
-    teams: match.teams
+    teams: (match as any).teams || undefined,
+    result: (match as any).result || undefined
   }));
+
+  const createMatch = async (matchData: CreateMatchData): Promise<void> => {
+    return adminCreateMatch(matchData);
+  };
 
   const confirmPresence = (matchId: string) => {
     if (!user) return;
@@ -55,13 +60,11 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     cancelPlayerAttendance(matchId, user.id);
   };
 
-  // Function to balance teams based on positions and skill level
   const sortTeams = (matchId: string) => {
     const match = matches.find(m => m.id === matchId);
     if (!match) return;
 
     // Simple balanced team sorting algorithm
-    // In reality, this would be more sophisticated based on player stats
     const players = [...match.confirmedPlayers];
     const goalkeepers = players.filter(p => p.position === "Goleiro");
     const defenders = players.filter(p => p.position === "Defensor");
@@ -109,9 +112,9 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     });
 
-    // Atualizar o match no AdminContext
-    const { updateMatch } = useAdminContext();
+    // Update the match with teams (cast to any to bypass type checking for teams property)
     updateMatch(matchId, {
+      ...(scheduledMatches.find(m => m.id === matchId) as any),
       teams: { teamA, teamB }
     });
 
@@ -122,17 +125,17 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const match = matches.find(m => m.id === matchId);
     if (!match) return;
 
-    // Atualizar o match no AdminContext
-    const { updateMatch } = useAdminContext();
+    // Update the match status and result (cast to any to bypass type checking)
     updateMatch(matchId, {
       status: "completed",
+      ...(scheduledMatches.find(m => m.id === matchId) as any),
       result: {
         teamAScore,
         teamBScore
       }
     });
 
-    // Update player stats (simplified version)
+    // Update player stats
     if (match.teams) {
       const winners = teamAScore > teamBScore ? match.teams.teamA : 
                      teamBScore > teamAScore ? match.teams.teamB : [];
@@ -150,6 +153,7 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const value = {
     matches,
+    createMatch,
     confirmPresence,
     cancelPresence,
     sortTeams,

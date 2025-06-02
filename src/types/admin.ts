@@ -1,4 +1,3 @@
-
 export interface MatchSchedule {
   id: string;
   title: string;
@@ -12,6 +11,14 @@ export interface MatchSchedule {
   createdAt: Date;
   confirmedPlayers: string[]; // IDs dos jogadores
   waitingList: string[]; // Lista de espera
+  teams?: {
+    teamA: any[];
+    teamB: any[];
+  };
+  result?: {
+    teamAScore: number;
+    teamBScore: number;
+  };
 }
 
 export interface PlayerConfirmation {
