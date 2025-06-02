@@ -1,22 +1,20 @@
-
-import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import ScheduledMatchCard from '@/components/ScheduledMatchCard';
 import { useNavigate } from 'react-router-dom';
-import { useAdminContext } from '@/contexts/AdminContext';
+import { useMatchContext } from '@/contexts/MatchContext'; // Usar MatchContext unificado
 import { useUserContext } from '@/contexts/UserContext';
 
 const Index = () => {
-  const { scheduledMatches } = useAdminContext();
+  const { matches } = useMatchContext(); // Usar matches do MatchContext unificado
   const { user } = useUserContext();
   const navigate = useNavigate();
 
   // Filtrar apenas partidas ativas e futuras
-  const activeMatches = scheduledMatches.filter(m => m.status === 'active');
+  const activeMatches = matches.filter(m => m.status === 'active');
   const upcomingMatches = activeMatches.filter(m => new Date(m.date) >= new Date());
-  const pastMatches = scheduledMatches.filter(m => m.status === 'completed');
+  const pastMatches = matches.filter(m => m.status === 'completed');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 to-primary/5">
@@ -81,13 +79,21 @@ const Index = () => {
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-2xl font-bold text-green-600">
-                  {scheduledMatches.filter(m => m.confirmedPlayers.includes(user.id)).length}
+                  {matches.filter(m => 
+                    Array.isArray(m.confirmedPlayers) && 
+                    m.confirmedPlayers.some(p => 
+                      typeof p === 'string' ? p === user.id : p.id === user.id
+                    )
+                  ).length}
                 </div>
                 <div className="text-sm text-gray-600">Confirmadas</div>
               </div>
               <div>
                 <div className="text-2xl font-bold text-yellow-600">
-                  {scheduledMatches.filter(m => m.waitingList.includes(user.id)).length}
+                  {matches.filter(m => 
+                    Array.isArray(m.waitingList) && 
+                    m.waitingList.includes(user.id)
+                  ).length}
                 </div>
                 <div className="text-sm text-gray-600">Lista de Espera</div>
               </div>
@@ -139,7 +145,7 @@ const Index = () => {
                   <div className="text-sm text-gray-600 space-y-1">
                     <p>📅 {new Date(match.date).toLocaleDateString('pt-BR')}</p>
                     <p>📍 {match.location}</p>
-                    <p>👥 {match.confirmedPlayers.length} jogadores</p>
+                    <p>👥 {Array.isArray(match.confirmedPlayers) ? match.confirmedPlayers.length : 0} jogadores</p>
                   </div>
                 </div>
               ))}

@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Player, Team, DEMO_PLAYERS, balancedTeamSort } from "@/types/liveMatch";
-import { Shuffle, Users, Trophy } from "lucide-react";
+import { Player, Team, DEMO_PLAYERS, balancedTeamSort, canStartMatch } from "@/types/liveMatch";
+import { Shuffle, Users, Trophy, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface TeamDrawProps {
   confirmedPlayers: Player[];
@@ -14,17 +14,26 @@ export const TeamDraw = ({ confirmedPlayers, onTeamsGenerated }: TeamDrawProps) 
   const [teams, setTeams] = useState<Team[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
 
+  // Verificar se há jogadores suficientes para iniciar uma partida
+  const hasMinimumPlayers = canStartMatch(confirmedPlayers);
+  
+  // Usar jogadores confirmados se houver o mínimo necessário, caso contrário usar DEMO_PLAYERS
+  const playersToUse = hasMinimumPlayers ? confirmedPlayers : DEMO_PLAYERS;
+
   const handleDraw = async () => {
     setIsDrawing(true);
     
     // Simular animação de sorteio
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const playersToUse = confirmedPlayers.length === 15 ? confirmedPlayers : DEMO_PLAYERS;
     const sortedTeams = balancedTeamSort(playersToUse);
     
     setTeams(sortedTeams);
     setIsDrawing(false);
+    
+    if (!hasMinimumPlayers) {
+      toast.info("Usando jogadores de demonstração para o sorteio");
+    }
   };
 
   const handleConfirmTeams = () => {
@@ -51,12 +60,21 @@ export const TeamDraw = ({ confirmedPlayers, onTeamsGenerated }: TeamDrawProps) 
           <CardHeader>
             <CardTitle className="text-2xl text-center text-white flex items-center justify-center gap-2">
               <Users className="w-8 h-8 text-green-400" />
-              JOGADORES CONFIRMADOS ({confirmedPlayers.length === 15 ? '15' : 'DEMO - 15'})
+              JOGADORES {!hasMinimumPlayers && "(MODO DEMO)"} ({playersToUse.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {!hasMinimumPlayers && (
+              <div className="mb-4 p-3 bg-yellow-500/20 rounded-lg border border-yellow-400 flex items-center gap-2">
+                <AlertCircle className="text-yellow-400" />
+                <span className="text-white">
+                  Não há jogadores suficientes confirmados. Usando jogadores de demonstração.
+                </span>
+              </div>
+            )}
+            
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {(confirmedPlayers.length === 15 ? confirmedPlayers : DEMO_PLAYERS).map((player) => (
+              {playersToUse.map((player) => (
                 <div key={player.id} className="flex items-center gap-2 p-3 bg-green-500/20 rounded-lg border border-green-400">
                   <span className="text-green-400 text-xl">✅</span>
                   <span className="text-white font-medium">{player.name}</span>

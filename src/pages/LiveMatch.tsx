@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { TeamDraw } from "@/components/live-match/TeamDraw";
 import { MatchSelection } from "@/components/live-match/MatchSelection";
@@ -7,9 +6,11 @@ import { RealisticScoreboard } from "@/components/live-match/RealisticScoreboard
 import { GoalTracker } from "@/components/live-match/GoalTracker";
 import { EventHistory } from "@/components/live-match/EventHistory";
 import { MatchEnd } from "@/components/live-match/MatchEnd";
-import { MatchState, Team, Player, MatchEvent, CompletedMatch, DEMO_PLAYERS } from "@/types/liveMatch";
+import { MatchState, Team, Player, MatchEvent, CompletedMatch, DEMO_PLAYERS, canStartMatch } from "@/types/liveMatch";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useUserContext } from "@/contexts/UserContext";
+import { useMatchContext } from "@/contexts/MatchContext";
 
 const INITIAL_STATE: MatchState = {
   phase: 'setup',
@@ -22,13 +23,55 @@ const INITIAL_STATE: MatchState = {
   }
 };
 
-const STORAGE_KEY = 'nosso-racha-complete-session';
+const STORAGE_KEY = 'nosso-raxa-complete-session';
 
 export default function LiveMatch() {
+  const { user } = useUserContext();
+  const { matches } = useMatchContext();
+  
   const [matchState, setMatchState] = useState<MatchState>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : INITIAL_STATE;
   });
+
+  // Atualizar jogadores confirmados se houver partidas disponíveis
+  useEffect(() => {
+    if (matches && matches.length > 0) {
+      // Encontrar partida com mais jogadores confirmados
+      const matchWithMostPlayers = [...matches].sort((a, b) => 
+        (Array.isArray(b.confirmedPlayers) ? b.confirmedPlayers.length : 0) - 
+        (Array.isArray(a.confirmedPlayers) ? a.confirmedPlayers.length : 0)
+      )[0];
+      
+      if (matchWithMostPlayers && Array.isArray(matchWithMostPlayers.confirmedPlayers)) {
+        // Converter para o formato Player necessário para o componente
+        const players: Player[] = matchWithMostPlayers.confirmedPlayers.map(p => {
+          if (typeof p === 'string') {
+            return { id: p, name: `Jogador ${p}` };
+          } else {
+            return { 
+              id: p.id, 
+              name: p.name,
+              position: p.position,
+              skillLevel: 3 // Valor padrão
+            };
+          }
+        });
+        
+        if (players.length > 0) {
+          setMatchState(prev => ({
+            ...prev,
+            session: {
+              ...prev.session,
+              confirmedPlayers: players
+            }
+          }));
+          
+          toast.info(`${players.length} jogadores carregados da partida selecionada`);
+        }
+      }
+    }
+  }, [matches]);
 
   const [pendingAssist, setPendingAssist] = useState<{
     goalEvent: MatchEvent | null;

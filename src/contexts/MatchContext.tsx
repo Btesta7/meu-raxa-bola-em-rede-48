@@ -1,13 +1,11 @@
-
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { Match, User } from '../types';
-import { mockMatches } from '../data/mockData';
 import { toast } from '@/components/ui/sonner';
 import { useUserContext } from './UserContext';
+import { useAdminContext } from './AdminContext';
 
 interface MatchContextType {
   matches: Match[];
-  createMatch: (match: Omit<Match, 'id' | 'confirmedPlayers'>) => void;
   confirmPresence: (matchId: string) => void;
   cancelPresence: (matchId: string) => void;
   sortTeams: (matchId: string) => void;
@@ -25,60 +23,36 @@ export const useMatchContext = () => {
 };
 
 export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [matches, setMatches] = useState<Match[]>(mockMatches);
   const { user, users, updateUserStats } = useUserContext();
-
-  const createMatch = (matchData: Omit<Match, 'id' | 'confirmedPlayers'>) => {
-    const newMatch: Match = {
-      ...matchData,
-      id: `${matches.length + 1}`,
-      confirmedPlayers: user ? [user] : [],
-    };
-
-    setMatches([...matches, newMatch]);
-    toast.success('Partida criada com sucesso!');
-  };
+  // Usar scheduledMatches do AdminContext como fonte única de dados
+  const { scheduledMatches, confirmPlayerAttendance, cancelPlayerAttendance } = useAdminContext();
+  
+  // Converter scheduledMatches para o formato Match se necessário
+  const matches: Match[] = scheduledMatches.map(match => ({
+    id: match.id,
+    title: match.title,
+    date: match.date,
+    time: match.time,
+    location: match.location,
+    maxPlayers: match.maxPlayers,
+    status: match.status,
+    // Converter IDs de jogadores para objetos User completos
+    confirmedPlayers: match.confirmedPlayers.map(playerId => 
+      users.find(u => u.id === playerId) || { id: playerId } as User
+    ),
+    // Adicionar outras propriedades necessárias
+    description: match.description || '',
+    teams: match.teams
+  }));
 
   const confirmPresence = (matchId: string) => {
     if (!user) return;
-
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        if (match.confirmedPlayers.length >= match.maxPlayers) {
-          toast.error('A partida já atingiu o limite de jogadores!');
-          return match;
-        }
-        
-        if (match.confirmedPlayers.some(player => player.id === user.id)) {
-          toast.info('Você já está confirmado nesta partida.');
-          return match;
-        }
-        
-        toast.success('Presença confirmada!');
-        return {
-          ...match,
-          confirmedPlayers: [...match.confirmedPlayers, user],
-        };
-      }
-      return match;
-    }));
+    confirmPlayerAttendance(matchId, user.id);
   };
 
   const cancelPresence = (matchId: string) => {
     if (!user) return;
-
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        toast.success('Presença cancelada.');
-        return {
-          ...match,
-          confirmedPlayers: match.confirmedPlayers.filter(
-            player => player.id !== user.id
-          ),
-        };
-      }
-      return match;
-    }));
+    cancelPlayerAttendance(matchId, user.id);
   };
 
   // Function to balance teams based on positions and skill level
@@ -135,55 +109,47 @@ export const MatchProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       }
     });
 
-    setMatches(matches.map(m => {
-      if (m.id === matchId) {
-        return {
-          ...m,
-          teams: { teamA, teamB }
-        };
-      }
-      return m;
-    }));
+    // Atualizar o match no AdminContext
+    const { updateMatch } = useAdminContext();
+    updateMatch(matchId, {
+      teams: { teamA, teamB }
+    });
 
     toast.success('Times sorteados com sucesso!');
   };
 
   const recordMatchResult = (matchId: string, teamAScore: number, teamBScore: number) => {
-    setMatches(matches.map(match => {
-      if (match.id === matchId) {
-        // Update match result
-        const updatedMatch = {
-          ...match,
-          status: "completed" as const,
-          result: {
-            teamAScore,
-            teamBScore
-          }
-        };
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
 
-        // Update player stats (simplified version)
-        if (match.teams) {
-          const winners = teamAScore > teamBScore ? match.teams.teamA : 
-                         teamBScore > teamAScore ? match.teams.teamB : [];
-
-          match.confirmedPlayers.forEach(player => {
-            updateUserStats(player.id, {
-              matches: player.stats.matches + 1,
-              wins: winners.some(p => p.id === player.id) ? player.stats.wins + 1 : player.stats.wins
-            });
-          });
-        }
-
-        toast.success('Resultado registrado com sucesso!');
-        return updatedMatch;
+    // Atualizar o match no AdminContext
+    const { updateMatch } = useAdminContext();
+    updateMatch(matchId, {
+      status: "completed",
+      result: {
+        teamAScore,
+        teamBScore
       }
-      return match;
-    }));
+    });
+
+    // Update player stats (simplified version)
+    if (match.teams) {
+      const winners = teamAScore > teamBScore ? match.teams.teamA : 
+                     teamBScore > teamAScore ? match.teams.teamB : [];
+
+      match.confirmedPlayers.forEach(player => {
+        updateUserStats(player.id, {
+          matches: player.stats.matches + 1,
+          wins: winners.some(p => p.id === player.id) ? player.stats.wins + 1 : player.stats.wins
+        });
+      });
+    }
+
+    toast.success('Resultado registrado com sucesso!');
   };
 
   const value = {
     matches,
-    createMatch,
     confirmPresence,
     cancelPresence,
     sortTeams,
