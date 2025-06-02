@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { TeamDraw } from './TeamDraw';
@@ -38,15 +37,15 @@ export const LiveMatchFlow = () => {
     isWaiting: boolean;
   }>({ goalEvent: null, isWaiting: false });
 
-  if (!scheduledMatch || scheduledMatch.confirmedPlayers.length < 15) {
+  if (!scheduledMatch || scheduledMatch.confirmedPlayers.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Partida não disponível para modo ao vivo
+            Partida não encontrada ou sem jogadores
           </h2>
           <p className="text-gray-600 mb-6">
-            É necessário ter 15 jogadores confirmados para iniciar a partida ao vivo.
+            Verifique se a partida existe e se há jogadores confirmados.
           </p>
           <Button onClick={() => navigate('/')} className="flex items-center gap-2">
             <ArrowLeft size={16} />

@@ -76,7 +76,8 @@ const MatchDetails = () => {
   };
   
   const percentFilled = (match.confirmedPlayers.length / match.maxPlayers) * 100;
-  const hasEnoughPlayers = match.confirmedPlayers.length >= 15;
+  // Permite iniciar com qualquer quantidade de jogadores (apenas precisa ter pelo menos 1)
+  const hasAnyPlayers = match.confirmedPlayers.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,7 +133,7 @@ const MatchDetails = () => {
                 </Button>
               )}
               
-              {hasEnoughPlayers && (
+              {hasAnyPlayers && (
                 <Button 
                   onClick={handleStartLiveMatch}
                   className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white"
@@ -165,11 +166,11 @@ const MatchDetails = () => {
             </div>
           )}
 
-          {hasEnoughPlayers && (
+          {hasAnyPlayers && (
             <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
               <p className="text-green-700 font-medium flex items-center gap-2">
                 <Play size={16} />
-                Partida pronta para modo ao vivo! (15 jogadores confirmados)
+                Partida pronta para modo ao vivo! ({match.confirmedPlayers.length} jogadores confirmados)
               </p>
             </div>
           )}
