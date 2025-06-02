@@ -33,6 +33,9 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       nextWednesday.setDate(nextWednesday.getDate() + 7);
     }
 
+    const lastSunday = new Date(today);
+    lastSunday.setDate(today.getDate() - 7);
+
     // Criar lista com jogadores para testes
     const mockPlayerIds = users.slice(0, 18).map(u => u.id);
 
@@ -63,6 +66,20 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         createdBy: '1', // Carlos Silva (admin)
         createdAt: new Date('2024-12-01'),
         confirmedPlayers: mockPlayerIds.slice(0, 12), // 12 jogadores confirmados
+        waitingList: []
+      },
+      {
+        id: 'match-003',
+        title: 'Pelada Passada',
+        date: lastSunday.toISOString().split('T')[0],
+        time: '15:00',
+        location: 'Quadra Central',
+        maxPlayers: 20,
+        description: 'Partida já finalizada',
+        status: 'completed',
+        createdBy: '1', // Carlos Silva (admin)
+        createdAt: new Date('2024-11-20'),
+        confirmedPlayers: mockPlayerIds.slice(0, 16),
         waitingList: []
       }
     ];
@@ -113,6 +130,18 @@ export const AdminProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const confirmPlayerAttendance = async (matchId: string, playerId: string): Promise<void> => {
     const match = scheduledMatches.find(m => m.id === matchId);
     if (!match) return;
+
+    // Verificar se o jogador já está confirmado
+    if (match.confirmedPlayers.includes(playerId)) {
+      toast.info('Você já está confirmado nesta partida');
+      return;
+    }
+
+    // Verificar se o jogador está na lista de espera
+    if (match.waitingList.includes(playerId)) {
+      toast.info('Você já está na lista de espera');
+      return;
+    }
 
     if (match.confirmedPlayers.length >= match.maxPlayers) {
       // Adicionar à lista de espera
